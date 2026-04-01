@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-
+import { Dimensions } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 const SEV_COLOR = {
   NIL:      '#00FF88',
   LIGHT:    '#FFD700',
@@ -275,7 +276,41 @@ export default function SimulationScreen({ route, navigation }) {
           </Text>
         </View>
       </View>
-
+{/* Fuel Burn Graph */}
+      {waypoints && waypoints.length > 1 && (
+        <View style={s.card}>
+          <Text style={s.cardTitle}>📈  FUEL BURN OVER ROUTE</Text>
+          <LineChart
+            data={{
+              labels: waypoints.map(wp => wp.name),
+              datasets: [{
+                data: waypoints.map((_, i) => {
+                  const burnPerLeg = report.fuel.burnKg / (waypoints.length - 1);
+                  return Math.max(0, report.fuel.onBoardKg - (burnPerLeg * i));
+                }),
+              }],
+            }}
+            width={Dimensions.get('window').width - 64}
+            height={180}
+            chartConfig={{
+              backgroundColor: '#111827',
+              backgroundGradientFrom: '#111827',
+              backgroundGradientTo: '#111827',
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 212, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(100, 120, 140, ${opacity})`,
+              propsForDots: {
+                r: '4',
+                strokeWidth: '2',
+                stroke: '#00D4FF',
+              },
+            }}
+            bezier
+            style={{ borderRadius: 10, marginTop: 8 }}
+          />
+          <Text style={s.graphSub}>Estimated fuel remaining (kg) per waypoint</Text>
+        </View>
+      )}
       {/* Turbulence */}
       <View style={s.card}>
         <Text style={s.cardTitle}>💨  TURBULENCE (PIREP)</Text>
@@ -403,4 +438,5 @@ const s = StyleSheet.create({
   altName:    { color:'#667788', fontSize:11, marginTop:2 },
   altReason:  { color:'#445566', fontSize:10, marginTop:2 },
   altDist:    { color:'#FFD700', fontWeight:'700', fontSize:13 },
+  graphSub: { color:'#445566', fontSize:10, textAlign:'center', marginTop:6 },
 });
