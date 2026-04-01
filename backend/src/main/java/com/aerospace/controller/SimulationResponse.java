@@ -22,7 +22,7 @@ public class SimulationResponse {
     public List<WindPoint>      windLayers;
     public List<AlternateAirport> alternates = new ArrayList<>();
     public List<NotamEntry>     notams     = new ArrayList<>();
-
+public SunriseSunsetEntry sunriseSunset;
     public static SimulationResponse from(FlightSimulationReport r) {
         SimulationResponse res     = new SimulationResponse();
         res.flightId               = r.flightPlan.flightId;
@@ -60,6 +60,15 @@ public class SimulationResponse {
             n.number(), n.text(), n.effectiveStart(),
             n.effectiveEnd(), n.classification())).toList();
 res.flightLevelReason = r.flightLevelReason;
+if (r.sunriseSunset != null) {
+    res.sunriseSunset = new SunriseSunsetEntry(
+        r.sunriseSunset.sunrise(),
+        r.sunriseSunset.sunset(),
+        r.sunriseSunset.solarNoon(),
+        r.sunriseSunset.dayLengthSeconds(),
+        r.sunriseSunset.civilTwilightBegin(),
+        r.sunriseSunset.civilTwilightEnd());
+}
         return res;
     }
 
@@ -89,4 +98,8 @@ res.flightLevelReason = r.flightLevelReason;
         String number, String text,
         String effectiveStart, String effectiveEnd,
         String classification) {}
+        public record SunriseSunsetEntry(
+    String sunrise, String sunset,
+    String solarNoon, int dayLengthSeconds,
+    String civilTwilightBegin, String civilTwilightEnd) {}
 }
