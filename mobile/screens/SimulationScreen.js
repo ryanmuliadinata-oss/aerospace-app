@@ -159,7 +159,22 @@ export default function SimulationScreen({ route, navigation }) {
             : report.goNoGoDecision.replace('NO-GO:', 'NO-GO: ')}
         </Text>
       </View>
-
+{/* Alternate Airports — only shown on NO-GO */}
+      {!report.isGo && report.alternates && report.alternates.length > 0 && (
+        <View style={s.altCard}>
+          <Text style={s.altTitle}>🔄  ALTERNATE AIRPORTS</Text>
+          {report.alternates.map((alt, i) => (
+            <View key={i} style={s.altRow}>
+              <View style={s.altLeft}>
+                <Text style={s.altIcao}>{alt.icao}</Text>
+                <Text style={s.altName}>{alt.name}</Text>
+                <Text style={s.altReason}>{alt.reason}</Text>
+              </View>
+              <Text style={s.altDist}>{alt.distanceNm.toFixed(0)} nm</Text>
+            </View>
+          ))}
+        </View>
+      )}
       {/* View on Map Button */}
       {report.weather && report.weather.length > 0 && (
         <TouchableOpacity
@@ -376,4 +391,16 @@ const s = StyleSheet.create({
   windSpeed:      { color:'#FFF', fontWeight:'600', flex:1 },
   windDir:        { color:'#667788', fontSize:11, width:54 },
   windTemp:       { color:'#667788', fontSize:11, width:52, textAlign:'right' },
+  altCard:    { backgroundColor:'#111827', borderRadius:14, padding:16,
+                marginBottom:14, borderWidth:1, borderColor:'#FFD70044' },
+  altTitle:   { color:'#FFD700', fontSize:11, fontWeight:'700',
+                letterSpacing:2.5, marginBottom:14 },
+  altRow:     { flexDirection:'row', alignItems:'center',
+                justifyContent:'space-between', paddingVertical:10,
+                borderBottomWidth:1, borderBottomColor:'#1F2937' },
+  altLeft:    { flex:1 },
+  altIcao:    { color:'#FFF', fontWeight:'800', fontSize:16 },
+  altName:    { color:'#667788', fontSize:11, marginTop:2 },
+  altReason:  { color:'#445566', fontSize:10, marginTop:2 },
+  altDist:    { color:'#FFD700', fontWeight:'700', fontSize:13 },
 });
