@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, StatusBar } from 'react-native';
-
+import HistoryScreen from './screens/HistoryScreen';
 import FlightPlanScreen from './screens/FlightPlanScreen';
 import SimulationScreen from './screens/SimulationScreen';
 import DashboardScreen  from './screens/DashboardScreen';
@@ -15,6 +15,7 @@ const ICONS = {
   'Simulation':  '🛰️',
   'Dashboard':   '📊',
   'Map':         '🗺️',
+  'History': '📋',
 };
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
           <Tab.Screen name="Simulation"  component={SimulationScreen} />
           <Tab.Screen name="Dashboard"   component={DashboardScreen}  />
           <Tab.Screen name="Map"         component={MapScreen}        />
+          <Tab.Screen name="History" component={HistoryScreen} />
         </Tab.Navigator>
       </NavigationContainer>
     </>

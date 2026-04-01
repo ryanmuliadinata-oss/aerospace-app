@@ -3,7 +3,10 @@ import {
   View, Text, TextInput, TouchableOpacity,
   ScrollView, StyleSheet, Alert, ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { runSimulation } from '../api/flightApi';
+
+const HISTORY_KEY = 'flight_history';
 
 const PRESETS = [
   {
@@ -71,6 +74,20 @@ export default function FlightPlanScreen({ navigation }) {
     setCruiseSpeed(String(p.cruiseSpeedKts));
   };
 
+  const saveToHistory = async (result) => {
+    try {
+      const raw = await AsyncStorage.getItem(HISTORY_KEY);
+      const history = raw ? JSON.parse(raw) : [];
+      history.push({
+        ...result,
+        date: new Date().toLocaleString(),
+      });
+      await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+      console.error('Failed to save history', e);
+    }
+  };
+
   const handleRun = async () => {
     if (!flightId || !origin || !destination) {
       Alert.alert('Missing Fields', 'Fill in all fields.');
@@ -89,6 +106,7 @@ export default function FlightPlanScreen({ navigation }) {
         fuelCapacityKg: parseFloat(fuelCapacity),
         cruiseSpeedKts: parseFloat(cruiseSpeed),
       });
+      await saveToHistory(result);
       navigation.navigate('Simulation', { report: result });
     } catch (e) {
       Alert.alert('Error', e?.response?.data?.message
