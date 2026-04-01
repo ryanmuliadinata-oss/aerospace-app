@@ -31,6 +31,7 @@ public class SecurityConfig {
     .requestMatchers("/api/health").permitAll()
     .requestMatchers("/api/simulate").permitAll()
     .requestMatchers("/api/greatcircle").permitAll()
+    .requestMatchers("/api/runway").permitAll()
     .anyRequest().denyAll()
            );
         return http.build();

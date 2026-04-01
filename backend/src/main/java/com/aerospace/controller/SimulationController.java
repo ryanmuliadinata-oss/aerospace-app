@@ -5,6 +5,7 @@ import com.aerospace.model.FlightSimulationReport;
 import com.aerospace.model.Waypoint;
 import com.aerospace.service.FlightSimulationOrchestrator;
 import com.aerospace.service.GreatCircleService;
+import com.aerospace.service.RunwayAnalysisService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,14 @@ public class SimulationController {
 
     private final FlightSimulationOrchestrator orchestrator;
     private final GreatCircleService           greatCircleService;
+    private final RunwayAnalysisService        runwayService;
 
     public SimulationController(FlightSimulationOrchestrator orchestrator,
-                                GreatCircleService greatCircleService) {
+                                GreatCircleService greatCircleService,
+                                RunwayAnalysisService runwayService) {
         this.orchestrator       = orchestrator;
         this.greatCircleService = greatCircleService;
+        this.runwayService      = runwayService;
     }
 
     @PostMapping("/simulate")
@@ -106,6 +110,21 @@ public class SimulationController {
                 origin.toUpperCase(), destination.toUpperCase(),
                 waypoints, altitude));
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body("{\"error\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    @PostMapping("/runway")
+    public ResponseEntity<?> runway(@RequestBody RunwayRequest req) {
+        if (req.aircraftType == null || req.weather == null)
+            return ResponseEntity.badRequest()
+                .body("{\"error\":\"aircraftType and weather required\"}");
+        try {
+            return ResponseEntity.ok(runwayService.analyze(
+                req.aircraftType, req.weather,
+                req.fuelKg, req.payloadKg));
+        } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body("{\"error\":\"" + e.getMessage() + "\"}");
         }
