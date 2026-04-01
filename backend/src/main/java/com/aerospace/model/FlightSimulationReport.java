@@ -1,5 +1,7 @@
 package com.aerospace.model;
 
+import com.aerospace.service.AlternateAirportService.AlternateSuggestion;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ public class FlightSimulationReport {
     public final String                 recommendedAltitude;
     public final double                 estimatedFlightTimeHrs;
     public final String                 goNoGoDecision;
+    public List<AlternateSuggestion>    alternates = new ArrayList<>();
 
     public FlightSimulationReport(
             FlightPlan plan,

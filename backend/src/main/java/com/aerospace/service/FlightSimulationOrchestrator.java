@@ -11,23 +11,26 @@ import java.util.List;
 @Service
 public class FlightSimulationOrchestrator {
 
-    private final AviationWeatherClient weatherClient;
-    private final OpenMeteoClient       windClient;
-    private final FlightAwareClient     fuelClient;
-    private final TurbulenceClient      turbulenceClient;
-    private final ApiKeyStore           keyStore;
+    private final AviationWeatherClient  weatherClient;
+    private final OpenMeteoClient        windClient;
+    private final FlightAwareClient      fuelClient;
+    private final TurbulenceClient       turbulenceClient;
+    private final ApiKeyStore            keyStore;
+    private final AlternateAirportService alternateService;
 
     public FlightSimulationOrchestrator(
-            AviationWeatherClient weatherClient,
-            OpenMeteoClient       windClient,
-            FlightAwareClient     fuelClient,
-            TurbulenceClient      turbulenceClient,
-            ApiKeyStore           keyStore) {
+            AviationWeatherClient  weatherClient,
+            OpenMeteoClient        windClient,
+            FlightAwareClient      fuelClient,
+            TurbulenceClient       turbulenceClient,
+            ApiKeyStore            keyStore,
+            AlternateAirportService alternateService) {
         this.weatherClient    = weatherClient;
         this.windClient       = windClient;
         this.fuelClient       = fuelClient;
         this.turbulenceClient = turbulenceClient;
         this.keyStore         = keyStore;
+        this.alternateService = alternateService;
     }
 
     public FlightSimulationReport simulate(String userId, FlightPlan plan)
@@ -59,7 +62,8 @@ public class FlightSimulationOrchestrator {
             double estimatedBurn    = plan.fuelCapacityKg * 0.65;
             double estimatedReserve = plan.fuelCapacityKg * 0.05;
             double estimatedAltn    = plan.fuelCapacityKg * 0.10;
-            fuelReport = new FuelReport(plan.flightId, estimatedBurn, estimatedReserve, estimatedAltn, plan.fuelCapacityKg);
+            fuelReport = new FuelReport(plan.flightId, estimatedBurn,
+                estimatedReserve, estimatedAltn, plan.fuelCapacityKg);
         }
 
         List<TurbulenceReport> turbulenceReports = new ArrayList<>();
@@ -78,8 +82,18 @@ public class FlightSimulationOrchestrator {
             .map(w -> "FL" + (int)(w.altitudeFt / 100))
             .orElse("FL350");
 
-        return new FlightSimulationReport(plan, weatherReports, fuelReport,
+        FlightSimulationReport report = new FlightSimulationReport(
+            plan, weatherReports, fuelReport,
             windLayers, turbulenceReports, recommendedAlt, flightTimeHrs);
+
+        // Suggest alternates only on NO-GO
+        if (!report.goNoGoDecision.startsWith("GO")) {
+            Waypoint dest = plan.waypoints.get(plan.waypoints.size() - 1);
+            report.alternates = alternateService.suggest(
+                plan.origin, plan.destination, dest);
+        }
+
+        return report;
     }
 
     private double estimateDistanceNm(List<Waypoint> waypoints) {
