@@ -16,6 +16,7 @@ public class FlightSimulationOrchestrator {
     private final TurbulenceClient        turbulenceClient;
     private final AlternateAirportService alternateService;
     private final NotamClient             notamClient;
+    private final SunriseSunsetClient     sunriseSunsetClient;
 
     public FlightSimulationOrchestrator(
             AviationWeatherClient   weatherClient,
@@ -23,13 +24,15 @@ public class FlightSimulationOrchestrator {
             FlightAwareClient       fuelClient,
             TurbulenceClient        turbulenceClient,
             AlternateAirportService alternateService,
-            NotamClient             notamClient) {
-        this.weatherClient    = weatherClient;
-        this.windClient       = windClient;
-        this.fuelClient       = fuelClient;
-        this.turbulenceClient = turbulenceClient;
-        this.alternateService = alternateService;
-        this.notamClient      = notamClient;
+            NotamClient             notamClient,
+            SunriseSunsetClient     sunriseSunsetClient) {
+        this.weatherClient       = weatherClient;
+        this.windClient          = windClient;
+        this.fuelClient          = fuelClient;
+        this.turbulenceClient    = turbulenceClient;
+        this.alternateService    = alternateService;
+        this.notamClient         = notamClient;
+        this.sunriseSunsetClient = sunriseSunsetClient;
     }
 
     public FlightSimulationReport simulate(String userId, FlightPlan plan)
@@ -97,6 +100,11 @@ public class FlightSimulationOrchestrator {
         notams.addAll(notamClient.fetchNotams(plan.destination));
         report.notams = notams;
 
+        // Fetch sunrise/sunset for origin
+        Waypoint origin = plan.waypoints.get(0);
+        report.sunriseSunset = sunriseSunsetClient.fetch(
+            origin.latitude, origin.longitude);
+
         return report;
     }
 
@@ -106,7 +114,7 @@ public class FlightSimulationOrchestrator {
         return windLayers.stream()
             .map(w -> {
                 double headwindPenalty = w.speedKts * 0.5;
-                double isaTemp  = 15 - 1.98 * (w.altitudeFt / 1000);
+                double isaTemp   = 15 - 1.98 * (w.altitudeFt / 1000);
                 double tempBonus = (isaTemp - w.temperatureCelsius) * 0.3;
                 double altBonus  = Math.min(w.altitudeFt / 1000, 39) * 0.5;
                 double score = headwindPenalty - tempBonus - altBonus;

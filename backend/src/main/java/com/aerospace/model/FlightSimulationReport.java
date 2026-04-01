@@ -1,4 +1,5 @@
 package com.aerospace.model;
+import com.aerospace.client.SunriseSunsetClient;
 
 import com.aerospace.service.AlternateAirportService.AlternateSuggestion;
 
@@ -50,4 +51,5 @@ public class FlightSimulationReport {
         if (!fuelOk) r.add("Insufficient fuel");
         return String.join("|", r);
     }
+    public SunriseSunsetClient.SunriseSunsetResult sunriseSunset = null;
 }
