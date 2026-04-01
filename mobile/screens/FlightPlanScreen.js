@@ -107,7 +107,7 @@ export default function FlightPlanScreen({ navigation }) {
         cruiseSpeedKts: parseFloat(cruiseSpeed),
       });
       await saveToHistory(result);
-      navigation.navigate('Simulation', { report: result });
+      navigation.navigate('Simulation', { report: result, waypoints: preset.plan.waypoints });
     } catch (e) {
       Alert.alert('Error', e?.response?.data?.message
         || e.message || 'Server unreachable.');

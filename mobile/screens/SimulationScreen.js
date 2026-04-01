@@ -46,7 +46,7 @@ const FuelBar = ({ label, value, max, color }) => {
 };
 
 export default function SimulationScreen({ route, navigation }) {
-  const report = route?.params?.report;
+  const { report, waypoints } = route?.params || {};
 
   if (!report) {
     return (
@@ -78,12 +78,10 @@ export default function SimulationScreen({ route, navigation }) {
         <TouchableOpacity
           style={s.mapBtn}
           onPress={() => navigation.navigate('Map', {
-            waypoints: report.weather.map(w => ({
-              name: w.icao,
-              latitude: 0,
-              longitude: 0,
-            }))
-          })}
+  waypoints: waypoints,
+  weather: report.weather,
+  turbulence: report.turbulence,
+})}
         >
           <Text style={s.mapBtnText}>🗺️  VIEW ROUTE ON MAP</Text>
         </TouchableOpacity>
