@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 const SEV_COLOR = {
   NIL:      '#00FF88',
@@ -45,7 +45,7 @@ const FuelBar = ({ label, value, max, color }) => {
   );
 };
 
-export default function SimulationScreen({ route }) {
+export default function SimulationScreen({ route, navigation }) {
   const report = route?.params?.report;
 
   if (!report) {
@@ -72,6 +72,22 @@ export default function SimulationScreen({ route }) {
             : report.goNoGoDecision.replace('NO-GO:', 'NO-GO: ')}
         </Text>
       </View>
+
+      {/* View on Map Button */}
+      {report.weather && report.weather.length > 0 && (
+        <TouchableOpacity
+          style={s.mapBtn}
+          onPress={() => navigation.navigate('Map', {
+            waypoints: report.weather.map(w => ({
+              name: w.icao,
+              latitude: 0,
+              longitude: 0,
+            }))
+          })}
+        >
+          <Text style={s.mapBtnText}>🗺️  VIEW ROUTE ON MAP</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Route Summary */}
       <View style={s.card}>
@@ -214,6 +230,10 @@ const s = StyleSheet.create({
                     borderWidth:1, borderColor:'#FF3333' },
   bannerIcon:     { fontSize:22 },
   bannerText:     { color:'#FFF', fontSize:14, fontWeight:'700', flex:1 },
+  mapBtn:         { backgroundColor:'#00D4FF22', borderRadius:12, padding:14,
+                    alignItems:'center', marginBottom:16,
+                    borderWidth:1, borderColor:'#00D4FF55' },
+  mapBtnText:     { color:'#00D4FF', fontWeight:'700', fontSize:13, letterSpacing:1 },
   card:           { backgroundColor:'#111827', borderRadius:14,
                     padding:16, marginBottom:14,
                     borderWidth:1, borderColor:'#1F2937' },
