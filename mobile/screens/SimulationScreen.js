@@ -350,7 +350,26 @@ export default function SimulationScreen({ route, navigation }) {
           </View>
         ))}
       </View>
-
+{/* NOTAMs */}
+      {report.notams && report.notams.length > 0 && (
+        <View style={[s.card, { marginBottom:40 }]}>
+          <Text style={s.cardTitle}>📋  NOTAMS</Text>
+          {report.notams.map((n, i) => (
+            <View key={i} style={s.notamRow}>
+              <View style={s.notamHeader}>
+                <Text style={s.notamNumber}>{n.number}</Text>
+                <Text style={s.notamClass}>{n.classification}</Text>
+              </View>
+              <Text style={s.notamText}>{n.text}</Text>
+              {n.effectiveStart !== '' && (
+                <Text style={s.notamDate}>
+                  {n.effectiveStart} → {n.effectiveEnd}
+                </Text>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -439,4 +458,12 @@ const s = StyleSheet.create({
   altReason:  { color:'#445566', fontSize:10, marginTop:2 },
   altDist:    { color:'#FFD700', fontWeight:'700', fontSize:13 },
   graphSub: { color:'#445566', fontSize:10, textAlign:'center', marginTop:6 },
+  notamRow:    { paddingVertical:10, borderBottomWidth:1,
+                 borderBottomColor:'#1F2937' },
+  notamHeader: { flexDirection:'row', justifyContent:'space-between',
+                 marginBottom:4 },
+  notamNumber: { color:'#FFF', fontWeight:'700', fontSize:12 },
+  notamClass:  { color:'#00D4FF', fontSize:11 },
+  notamText:   { color:'#8899AA', fontSize:11, lineHeight:16 },
+  notamDate:   { color:'#445566', fontSize:10, marginTop:4 },
 });
