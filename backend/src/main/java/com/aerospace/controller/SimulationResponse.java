@@ -14,6 +14,7 @@ public class SimulationResponse {
     public double               estimatedFlightTimeHrs;
     public String               recommendedAltitude;
     public String               goNoGoDecision;
+    public String flightLevelReason = "";
     public boolean              isGo;
     public FuelSummary          fuel;
     public List<WxPoint>        weather;
@@ -58,7 +59,7 @@ public class SimulationResponse {
         res.notams = r.notams.stream().map(n -> new NotamEntry(
             n.number(), n.text(), n.effectiveStart(),
             n.effectiveEnd(), n.classification())).toList();
-
+res.flightLevelReason = r.flightLevelReason;
         return res;
     }
 

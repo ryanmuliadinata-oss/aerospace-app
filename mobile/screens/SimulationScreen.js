@@ -212,7 +212,13 @@ export default function SimulationScreen({ route, navigation }) {
         <View style={s.statsRow}>
           <Stat label="Aircraft" value={report.aircraftType} />
           <Stat label="Est Time" value={`${report.estimatedFlightTimeHrs.toFixed(1)} hr`} />
-          <Stat label="Rec Alt"  value={`FL${report.recommendedAltitude}`} />
+          <View style={s.stat}>
+  <Text style={s.statVal}>FL{report.recommendedAltitude}</Text>
+  <Text style={s.statLbl}>REC ALT</Text>
+  {report.flightLevelReason ? (
+    <Text style={s.altReason}>{report.flightLevelReason}</Text>
+  ) : null}
+</View>
         </View>
       </View>
 
@@ -466,4 +472,6 @@ const s = StyleSheet.create({
   notamClass:  { color:'#00D4FF', fontSize:11 },
   notamText:   { color:'#8899AA', fontSize:11, lineHeight:16 },
   notamDate:   { color:'#445566', fontSize:10, marginTop:4 },
+  altReason: { color:'#445566', fontSize:9, textAlign:'center',
+             marginTop:3, maxWidth:100 },
 });

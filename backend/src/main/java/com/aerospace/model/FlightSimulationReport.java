@@ -14,6 +14,7 @@ public class FlightSimulationReport {
     public final String                 recommendedAltitude;
     public final double                 estimatedFlightTimeHrs;
     public final String                 goNoGoDecision;
+    public String flightLevelReason = "";
     public List<AlternateSuggestion>    alternates = new ArrayList<>();
     public List<com.aerospace.client.NotamClient.NotamItem> notams = new ArrayList<>();
     public FlightSimulationReport(
