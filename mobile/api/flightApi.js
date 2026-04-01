@@ -16,3 +16,11 @@ export const checkHealth = async () => {
   const response = await client.get('/health');
   return response.data;
 };
+
+
+export const getGreatCircleRoute = async (origin, destination, numWaypoints = 3, altitude = 35000) => {
+  const response = await client.get('/greatcircle', {
+    params: { origin, destination, waypoints: numWaypoints, altitude }
+  });
+  return response.data;
+};
