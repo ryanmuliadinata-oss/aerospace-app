@@ -9,6 +9,7 @@ import DashboardScreen  from './screens/DashboardScreen';
 import MapScreen        from './screens/MapScreen';
 import WeightBalanceScreen from './screens/WeightBalanceScreen';
 import GreatCircleScreen from './screens/GreatCircleScreen';
+import RunwayScreen from './screens/RunwayScreen';
 const Tab = createBottomTabNavigator();
 
 const ICONS = {
@@ -19,6 +20,7 @@ const ICONS = {
   'History': '📋',
   'W&B': '⚖️',
   'Route': '🌍',
+  'Runway': '🛬',
 };
 
 export default function App() {
@@ -52,6 +54,7 @@ export default function App() {
           <Tab.Screen name="History" component={HistoryScreen} />
           <Tab.Screen name="W&B" component={WeightBalanceScreen} />
           <Tab.Screen name="Route" component={GreatCircleScreen} />
+          <Tab.Screen name="Runway" component={RunwayScreen} />
         </Tab.Navigator>
       </NavigationContainer>
     </>
