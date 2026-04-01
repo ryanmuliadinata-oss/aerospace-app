@@ -17,20 +17,23 @@ public class FlightSimulationOrchestrator {
     private final TurbulenceClient       turbulenceClient;
     private final ApiKeyStore            keyStore;
     private final AlternateAirportService alternateService;
-
+    private final NotamClient notamClient;
     public FlightSimulationOrchestrator(
             AviationWeatherClient  weatherClient,
             OpenMeteoClient        windClient,
             FlightAwareClient      fuelClient,
             TurbulenceClient       turbulenceClient,
             ApiKeyStore            keyStore,
-            AlternateAirportService alternateService) {
+            AlternateAirportService alternateService,
+            NotamClient notamClient) 
+            {
         this.weatherClient    = weatherClient;
         this.windClient       = windClient;
         this.fuelClient       = fuelClient;
         this.turbulenceClient = turbulenceClient;
         this.keyStore         = keyStore;
         this.alternateService = alternateService;
+        this.notamClient = notamClient;
     }
 
     public FlightSimulationReport simulate(String userId, FlightPlan plan)
@@ -92,7 +95,11 @@ public class FlightSimulationOrchestrator {
             report.alternates = alternateService.suggest(
                 plan.origin, plan.destination, dest);
         }
-
+// Fetch NOTAMs for origin and destination
+List<com.aerospace.client.NotamClient.NotamItem> notams = new ArrayList<>();
+notams.addAll(notamClient.fetchNotams(plan.origin));
+notams.addAll(notamClient.fetchNotams(plan.destination));
+report.notams = notams;
         return report;
     }
 

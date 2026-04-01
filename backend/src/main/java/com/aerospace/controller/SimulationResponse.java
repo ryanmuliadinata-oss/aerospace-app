@@ -7,19 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimulationResponse {
-    public String          flightId;
-    public String          origin;
-    public String          destination;
-    public String          aircraftType;
-    public double          estimatedFlightTimeHrs;
-    public String          recommendedAltitude;
-    public String          goNoGoDecision;
-    public boolean         isGo;
-    public FuelSummary     fuel;
-    public List<WxPoint>   weather;
-    public List<TurbPoint> turbulence;
-    public List<WindPoint> windLayers;
-public List<AlternateAirport> alternates = new ArrayList<>();
+    public String               flightId;
+    public String               origin;
+    public String               destination;
+    public String               aircraftType;
+    public double               estimatedFlightTimeHrs;
+    public String               recommendedAltitude;
+    public String               goNoGoDecision;
+    public boolean              isGo;
+    public FuelSummary          fuel;
+    public List<WxPoint>        weather;
+    public List<TurbPoint>      turbulence;
+    public List<WindPoint>      windLayers;
+    public List<AlternateAirport> alternates = new ArrayList<>();
+    public List<NotamEntry>     notams     = new ArrayList<>();
+
     public static SimulationResponse from(FlightSimulationReport r) {
         SimulationResponse res     = new SimulationResponse();
         res.flightId               = r.flightPlan.flightId;
@@ -49,8 +51,14 @@ public List<AlternateAirport> alternates = new ArrayList<>();
         res.windLayers = r.windLayers.stream().map(wl -> new WindPoint(
             wl.altitudeFt, wl.speedKts,
             wl.directionDeg, wl.temperatureCelsius)).toList();
-res.alternates = r.alternates.stream().map(a -> new AlternateAirport(
-    a.icao(), a.name(), a.reason(), a.distanceNm())).toList();
+
+        res.alternates = r.alternates.stream().map(a -> new AlternateAirport(
+            a.icao(), a.name(), a.reason(), a.distanceNm())).toList();
+
+        res.notams = r.notams.stream().map(n -> new NotamEntry(
+            n.number(), n.text(), n.effectiveStart(),
+            n.effectiveEnd(), n.classification())).toList();
+
         return res;
     }
 
@@ -71,7 +79,13 @@ res.alternates = r.alternates.stream().map(a -> new AlternateAirport(
     public record WindPoint(
         double altitudeFt, double speedKts,
         double dirDeg, double tempC) {}
-public record AlternateAirport(
-    String icao, String name,
-    String reason, double distanceNm) {}
+
+    public record AlternateAirport(
+        String icao, String name,
+        String reason, double distanceNm) {}
+
+    public record NotamEntry(
+        String number, String text,
+        String effectiveStart, String effectiveEnd,
+        String classification) {}
 }

@@ -15,7 +15,7 @@ public class FlightSimulationReport {
     public final double                 estimatedFlightTimeHrs;
     public final String                 goNoGoDecision;
     public List<AlternateSuggestion>    alternates = new ArrayList<>();
-
+    public List<com.aerospace.client.NotamClient.NotamItem> notams = new ArrayList<>();
     public FlightSimulationReport(
             FlightPlan plan,
             List<WeatherReport> weather,
