@@ -76,14 +76,13 @@ public class FlightSimulationOrchestrator {
             ? estimateDistanceNm(plan.waypoints) / plan.cruiseSpeedKts
             : 0;
 
-        String recommendedAlt = windLayers.isEmpty() ? "FL350" : windLayers.stream()
-            .min((a, b) -> Double.compare(a.speedKts, b.speedKts))
-            .map(w -> "FL" + (int)(w.altitudeFt / 100))
-            .orElse("FL350");
+        String recommendedAlt = optimizeFlightLevel(windLayers, plan);
 
         FlightSimulationReport report = new FlightSimulationReport(
             plan, weatherReports, fuelReport,
             windLayers, turbulenceReports, recommendedAlt, flightTimeHrs);
+
+        report.flightLevelReason = buildFlightLevelReason(windLayers, recommendedAlt);
 
         // Suggest alternates only on NO-GO
         if (!report.goNoGoDecision.startsWith("GO")) {
@@ -99,6 +98,37 @@ public class FlightSimulationOrchestrator {
         report.notams = notams;
 
         return report;
+    }
+
+    private String optimizeFlightLevel(List<WindLayer> windLayers, FlightPlan plan) {
+        if (windLayers.isEmpty()) return "FL350";
+
+        return windLayers.stream()
+            .map(w -> {
+                double headwindPenalty = w.speedKts * 0.5;
+                double isaTemp  = 15 - 1.98 * (w.altitudeFt / 1000);
+                double tempBonus = (isaTemp - w.temperatureCelsius) * 0.3;
+                double altBonus  = Math.min(w.altitudeFt / 1000, 39) * 0.5;
+                double score = headwindPenalty - tempBonus - altBonus;
+                return new double[]{ score, w.altitudeFt };
+            })
+            .min((a, b) -> Double.compare(a[0], b[0]))
+            .map(w -> "FL" + (int)(w[1] / 100))
+            .orElse("FL350");
+    }
+
+    private String buildFlightLevelReason(List<WindLayer> windLayers,
+                                           String selectedAlt) {
+        if (windLayers.isEmpty())
+            return "Default cruise altitude — no wind data available";
+
+        return windLayers.stream()
+            .filter(w -> selectedAlt.equals("FL" + (int)(w.altitudeFt / 100)))
+            .findFirst()
+            .map(w -> String.format(
+                "Best efficiency: %.0f kts wind, %.1f°C at %s",
+                w.speedKts, w.temperatureCelsius, selectedAlt))
+            .orElse("Optimal based on winds aloft data");
     }
 
     private double estimateDistanceNm(List<Waypoint> waypoints) {
