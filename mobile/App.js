@@ -6,6 +6,7 @@ import { Text, StatusBar } from 'react-native';
 import FlightPlanScreen from './screens/FlightPlanScreen';
 import SimulationScreen from './screens/SimulationScreen';
 import DashboardScreen  from './screens/DashboardScreen';
+import MapScreen        from './screens/MapScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -13,6 +14,7 @@ const ICONS = {
   'Flight Plan': '✈️',
   'Simulation':  '🛰️',
   'Dashboard':   '📊',
+  'Map':         '🗺️',
 };
 
 export default function App() {
@@ -42,6 +44,7 @@ export default function App() {
           <Tab.Screen name="Flight Plan" component={FlightPlanScreen} />
           <Tab.Screen name="Simulation"  component={SimulationScreen} />
           <Tab.Screen name="Dashboard"   component={DashboardScreen}  />
+          <Tab.Screen name="Map"         component={MapScreen}        />
         </Tab.Navigator>
       </NavigationContainer>
     </>
