@@ -27,11 +27,12 @@ public class SecurityConfig {
                     .includeSubDomains(true)
                     .maxAgeInSeconds(31536000))
             )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health").permitAll()
-                .requestMatchers("/api/simulate").permitAll()
-                .anyRequest().denyAll()
-            );
+           .authorizeHttpRequests(auth -> auth
+    .requestMatchers("/api/health").permitAll()
+    .requestMatchers("/api/simulate").permitAll()
+    .requestMatchers("/api/greatcircle").permitAll()
+    .anyRequest().denyAll()
+           );
         return http.build();
     }
 

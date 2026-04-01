@@ -4,6 +4,8 @@ import com.aerospace.model.FlightPlan;
 import com.aerospace.model.FlightSimulationReport;
 import com.aerospace.model.Waypoint;
 import com.aerospace.service.FlightSimulationOrchestrator;
+import com.aerospace.service.GreatCircleService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,16 +16,18 @@ import java.time.Instant;
 public class SimulationController {
 
     private final FlightSimulationOrchestrator orchestrator;
+    private final GreatCircleService           greatCircleService;
 
-    public SimulationController(FlightSimulationOrchestrator orchestrator) {
-        this.orchestrator = orchestrator;
+    public SimulationController(FlightSimulationOrchestrator orchestrator,
+                                GreatCircleService greatCircleService) {
+        this.orchestrator       = orchestrator;
+        this.greatCircleService = greatCircleService;
     }
 
     @PostMapping("/simulate")
     public ResponseEntity<?> simulate(
             @RequestBody SimulationRequest req) throws Exception {
 
-        // Input validation
         if (req == null)
             return ResponseEntity.badRequest()
                 .body("{\"error\":\"Request body is required\"}");
@@ -83,5 +87,27 @@ public class SimulationController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
+    }
+
+    @GetMapping("/greatcircle")
+    public ResponseEntity<?> greatCircle(
+            @RequestParam String origin,
+            @RequestParam String destination,
+            @RequestParam(defaultValue = "3") int waypoints,
+            @RequestParam(defaultValue = "35000") double altitude) {
+
+        if (origin == null || origin.length() != 4 ||
+            destination == null || destination.length() != 4)
+            return ResponseEntity.badRequest()
+                .body("{\"error\":\"Invalid ICAO codes\"}");
+
+        try {
+            return ResponseEntity.ok(greatCircleService.calculate(
+                origin.toUpperCase(), destination.toUpperCase(),
+                waypoints, altitude));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body("{\"error\":\"" + e.getMessage() + "\"}");
+        }
     }
 }
