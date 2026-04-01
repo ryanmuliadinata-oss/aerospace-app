@@ -1,4 +1,4 @@
-ppackage com.aerospace.client;
+package com.aerospace.client;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
