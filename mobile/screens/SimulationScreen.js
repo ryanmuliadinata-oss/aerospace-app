@@ -1,5 +1,9 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+
+Copy
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { fetchRouteAirQuality } from '../api/airQualityApi';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Dimensions } from 'react-native';
@@ -12,26 +16,26 @@ const SEV_COLOR = {
   EXTREME:  '#CC0000',
   UNKNOWN:  '#556677',
 };
-
+ 
 const WX_COLOR = {
   VFR:  '#00FF88',
   MVFR: '#6699FF',
   IFR:  '#FF3333',
   LIFR: '#FF00FF',
 };
-
+ 
 const dirToArrow = (deg) => {
   const dirs = ['↑','↗','→','↘','↓','↙','←','↖'];
   return dirs[Math.round(deg / 45) % 8];
 };
-
+ 
 const Stat = ({ label, value }) => (
   <View style={s.stat}>
     <Text style={s.statVal}>{value}</Text>
     <Text style={s.statLbl}>{label}</Text>
   </View>
 );
-
+ 
 const FuelBar = ({ label, value, max, color }) => {
   const pct = Math.min((value / (max || 1)) * 100, 100);
   return (
@@ -47,10 +51,21 @@ const FuelBar = ({ label, value, max, color }) => {
     </View>
   );
 };
-
+ 
 export default function SimulationScreen({ route, navigation }) {
   const { report, waypoints } = route?.params || {};
-
+  const [airQuality,    setAirQuality]    = useState([]);
+  const [aqLoading,     setAqLoading]     = useState(false);
+ 
+  useEffect(() => {
+    if (!waypoints || waypoints.length === 0) return;
+    setAqLoading(true);
+    fetchRouteAirQuality(waypoints)
+      .then(setAirQuality)
+      .catch(e => console.warn('[SimulationScreen] AQ error:', e))
+      .finally(() => setAqLoading(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+ 
   if (!report) {
     return (
       <View style={s.empty}>
@@ -62,7 +77,7 @@ export default function SimulationScreen({ route, navigation }) {
       </View>
     );
   }
-
+ 
   const shareReport = async () => {
     const html = `
       <html>
@@ -147,10 +162,10 @@ export default function SimulationScreen({ route, navigation }) {
       Alert.alert('Error', 'Could not generate report.');
     }
   };
-
+ 
   return (
     <ScrollView style={s.container}>
-
+ 
       {/* GO / NO-GO Banner */}
       <View style={[s.banner, report.isGo ? s.bannerGo : s.bannerNogo]}>
         <Text style={s.bannerIcon}>{report.isGo ? '✅' : '❌'}</Text>
@@ -189,12 +204,12 @@ export default function SimulationScreen({ route, navigation }) {
           <Text style={s.mapBtnText}>🗺️  VIEW ROUTE ON MAP</Text>
         </TouchableOpacity>
       )}
-
+ 
       {/* Share Report Button */}
       <TouchableOpacity style={s.shareBtn} onPress={shareReport}>
         <Text style={s.shareBtnText}>📄  SHARE DISPATCH REPORT</Text>
       </TouchableOpacity>
-
+ 
       {/* Route Summary */}
       <View style={s.card}>
         <Text style={s.cardTitle}>ROUTE SUMMARY</Text>
@@ -221,7 +236,7 @@ export default function SimulationScreen({ route, navigation }) {
 </View>
         </View>
       </View>
-
+ 
       {/* Weather */}
       <View style={s.card}>
         <Text style={s.cardTitle}>🌦  METAR WEATHER</Text>
@@ -253,7 +268,7 @@ export default function SimulationScreen({ route, navigation }) {
           </View>
         ))}
       </View>
-
+ 
       {/* Fuel */}
       <View style={s.card}>
         <Text style={s.cardTitle}>⛽  FUEL ANALYSIS</Text>
@@ -340,7 +355,54 @@ export default function SimulationScreen({ route, navigation }) {
           </View>
         ))}
       </View>
-
+ 
+      {/* Air Quality (Open-Meteo) */}
+      <View style={[s.card, { marginBottom: 14 }]}>
+        <View style={s.aqHeader}>
+          <Text style={s.cardTitle}>🌫  AIR QUALITY (Open-Meteo)</Text>
+          {aqLoading && <ActivityIndicator size="small" color="#00D4FF" />}
+        </View>
+        {airQuality.length === 0 && !aqLoading && (
+          <Text style={s.aqEmpty}>No air quality data available.</Text>
+        )}
+        {airQuality.map((aq, i) => (
+          <View key={i} style={s.aqRow}>
+            <View style={s.aqLeft}>
+              <Text style={s.aqIcao}>{aq.name}</Text>
+              <View style={[s.aqiBadge, { borderColor: aq.aqiColor + '88' }]}>
+                <Text style={[s.aqiLabel, { color: aq.aqiColor }]}>{aq.aqiLabel}</Text>
+              </View>
+            </View>
+            <View style={s.aqStats}>
+              <View style={s.aqStat}>
+                <Text style={s.aqVal}>
+                  {aq.pm25 != null ? aq.pm25.toFixed(1) : '—'}
+                </Text>
+                <Text style={s.aqStatLbl}>PM2.5</Text>
+              </View>
+              <View style={s.aqStat}>
+                <Text style={s.aqVal}>
+                  {aq.pm10 != null ? aq.pm10.toFixed(1) : '—'}
+                </Text>
+                <Text style={s.aqStatLbl}>PM10</Text>
+              </View>
+              <View style={s.aqStat}>
+                <Text style={s.aqVal}>
+                  {aq.visibilityKm != null ? `${aq.visibilityKm}` : '—'}
+                </Text>
+                <Text style={s.aqStatLbl}>VIS km</Text>
+              </View>
+              <View style={s.aqStat}>
+                <Text style={s.aqVal}>
+                  {aq.uv != null ? aq.uv.toFixed(1) : '—'}
+                </Text>
+                <Text style={s.aqStatLbl}>UV</Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+ 
       {/* Wind Layers */}
       <View style={[s.card, { marginBottom:40 }]}>
         <Text style={s.cardTitle}>🌬  UPPER WINDS (Open-Meteo)</Text>
@@ -379,7 +441,7 @@ export default function SimulationScreen({ route, navigation }) {
     </ScrollView>
   );
 }
-
+ 
 const s = StyleSheet.create({
   container:      { flex:1, backgroundColor:'#0A0E1A', padding:16 },
   empty:          { flex:1, backgroundColor:'#0A0E1A',
@@ -464,6 +526,22 @@ const s = StyleSheet.create({
   altReason:  { color:'#445566', fontSize:10, marginTop:2 },
   altDist:    { color:'#FFD700', fontWeight:'700', fontSize:13 },
   graphSub: { color:'#445566', fontSize:10, textAlign:'center', marginTop:6 },
+  // Air Quality
+  aqHeader:    { flexDirection:'row', justifyContent:'space-between',
+                 alignItems:'center', marginBottom:14 },
+  aqEmpty:     { color:'#445566', fontSize:12, textAlign:'center', padding:8 },
+  aqRow:       { flexDirection:'row', alignItems:'center',
+                 paddingVertical:10, borderBottomWidth:1,
+                 borderBottomColor:'#0F1520', gap:12 },
+  aqLeft:      { width:80, gap:4 },
+  aqIcao:      { color:'#FFF', fontWeight:'800', fontSize:14 },
+  aqiBadge:    { borderWidth:1, borderRadius:4,
+                 paddingHorizontal:5, paddingVertical:2, alignSelf:'flex-start' },
+  aqiLabel:    { fontSize:8, fontWeight:'800', letterSpacing:1 },
+  aqStats:     { flex:1, flexDirection:'row', justifyContent:'space-between' },
+  aqStat:      { alignItems:'center' },
+  aqVal:       { color:'#FFF', fontWeight:'700', fontSize:13 },
+  aqStatLbl:   { color:'#445566', fontSize:8, letterSpacing:1, marginTop:2 },
   notamRow:    { paddingVertical:10, borderBottomWidth:1,
                  borderBottomColor:'#1F2937' },
   notamHeader: { flexDirection:'row', justifyContent:'space-between',
