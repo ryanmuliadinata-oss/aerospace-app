@@ -1,15 +1,16 @@
 package com.aerospace.service;
-
+ 
 import com.aerospace.client.*;
 import com.aerospace.model.*;
+import com.aerospace.service.FuelOptimizationService.FuelOptimizationResult;
 import org.springframework.stereotype.Service;
-
+ 
 import java.util.ArrayList;
 import java.util.List;
-
+ 
 @Service
 public class FlightSimulationOrchestrator {
-
+ 
     private final AviationWeatherClient   weatherClient;
     private final OpenMeteoClient         windClient;
     private final FlightAwareClient       fuelClient;
@@ -17,7 +18,8 @@ public class FlightSimulationOrchestrator {
     private final AlternateAirportService alternateService;
     private final NotamClient             notamClient;
     private final SunriseSunsetClient     sunriseSunsetClient;
-
+    private final FuelOptimizationService fuelOptService;
+ 
     public FlightSimulationOrchestrator(
             AviationWeatherClient   weatherClient,
             OpenMeteoClient         windClient,
@@ -25,7 +27,8 @@ public class FlightSimulationOrchestrator {
             TurbulenceClient        turbulenceClient,
             AlternateAirportService alternateService,
             NotamClient             notamClient,
-            SunriseSunsetClient     sunriseSunsetClient) {
+            SunriseSunsetClient     sunriseSunsetClient,
+            FuelOptimizationService fuelOptService) {
         this.weatherClient       = weatherClient;
         this.windClient          = windClient;
         this.fuelClient          = fuelClient;
@@ -33,11 +36,12 @@ public class FlightSimulationOrchestrator {
         this.alternateService    = alternateService;
         this.notamClient         = notamClient;
         this.sunriseSunsetClient = sunriseSunsetClient;
+        this.fuelOptService      = fuelOptService;
     }
-
+ 
     public FlightSimulationReport simulate(String userId, FlightPlan plan)
             throws Exception {
-
+ 
         List<WeatherReport> weatherReports = new ArrayList<>();
         for (Waypoint wp : plan.waypoints) {
             try {
@@ -47,7 +51,7 @@ public class FlightSimulationOrchestrator {
                 weatherReports.add(new WeatherReport(wp, 0, 0, 0, 1013.25, "UNKN", "N/A", false));
             }
         }
-
+ 
         List<WindLayer> windLayers = new ArrayList<>();
         try {
             Waypoint first = plan.waypoints.get(0);
@@ -55,7 +59,7 @@ public class FlightSimulationOrchestrator {
         } catch (Exception e) {
             System.err.println("[Wind] OpenMeteo failed: " + e.getMessage());
         }
-
+ 
         FuelReport fuelReport;
         try {
             fuelReport = fuelClient.fetchFuelEstimate(userId, plan);
@@ -67,50 +71,54 @@ public class FlightSimulationOrchestrator {
             fuelReport = new FuelReport(plan.flightId, estimatedBurn,
                 estimatedReserve, estimatedAltn, plan.fuelCapacityKg);
         }
-
+ 
         List<TurbulenceReport> turbulenceReports = new ArrayList<>();
         try {
             turbulenceReports = turbulenceClient.fetchTurbulence(userId, plan.waypoints);
         } catch (Exception e) {
             System.err.println("[Turbulence] PIREP failed: " + e.getMessage());
         }
-
+ 
         double flightTimeHrs = plan.cruiseSpeedKts > 0
             ? estimateDistanceNm(plan.waypoints) / plan.cruiseSpeedKts
             : 0;
-
+ 
         String recommendedAlt = optimizeFlightLevel(windLayers, plan);
-
+ 
+        // Run fuel optimization engine
+        FuelOptimizationResult fuelOpt = fuelOptService.optimize(plan, windLayers);
+ 
         FlightSimulationReport report = new FlightSimulationReport(
             plan, weatherReports, fuelReport,
             windLayers, turbulenceReports, recommendedAlt, flightTimeHrs);
-
-        report.flightLevelReason = buildFlightLevelReason(windLayers, recommendedAlt);
-
+ 
+        report.flightLevelReason  = buildFlightLevelReason(windLayers, recommendedAlt);
+        report.fuelOptimization   = fuelOpt;
+ 
         // Suggest alternates only on NO-GO
         if (!report.goNoGoDecision.startsWith("GO")) {
             Waypoint dest = plan.waypoints.get(plan.waypoints.size() - 1);
             report.alternates = alternateService.suggest(
                 plan.origin, plan.destination, dest);
         }
-
+ 
         // Fetch NOTAMs for origin and destination
         List<com.aerospace.client.NotamClient.NotamItem> notams = new ArrayList<>();
         notams.addAll(notamClient.fetchNotams(plan.origin));
         notams.addAll(notamClient.fetchNotams(plan.destination));
         report.notams = notams;
-
+ 
         // Fetch sunrise/sunset for origin
         Waypoint origin = plan.waypoints.get(0);
         report.sunriseSunset = sunriseSunsetClient.fetch(
             origin.latitude, origin.longitude);
-
+ 
         return report;
     }
-
+ 
     private String optimizeFlightLevel(List<WindLayer> windLayers, FlightPlan plan) {
         if (windLayers.isEmpty()) return "FL350";
-
+ 
         return windLayers.stream()
             .map(w -> {
                 double headwindPenalty = w.speedKts * 0.5;
@@ -124,12 +132,12 @@ public class FlightSimulationOrchestrator {
             .map(w -> "FL" + (int)(w[1] / 100))
             .orElse("FL350");
     }
-
+ 
     private String buildFlightLevelReason(List<WindLayer> windLayers,
                                            String selectedAlt) {
         if (windLayers.isEmpty())
             return "Default cruise altitude — no wind data available";
-
+ 
         return windLayers.stream()
             .filter(w -> selectedAlt.equals("FL" + (int)(w.altitudeFt / 100)))
             .findFirst()
@@ -138,7 +146,7 @@ public class FlightSimulationOrchestrator {
                 w.speedKts, w.temperatureCelsius, selectedAlt))
             .orElse("Optimal based on winds aloft data");
     }
-
+ 
     private double estimateDistanceNm(List<Waypoint> waypoints) {
         if (waypoints == null || waypoints.size() < 2) return 0;
         double total = 0;
@@ -147,7 +155,7 @@ public class FlightSimulationOrchestrator {
         }
         return total;
     }
-
+ 
     private double haversineNm(Waypoint a, Waypoint b) {
         final double R = 3440.065;
         double dLat = Math.toRadians(b.latitude  - a.latitude);

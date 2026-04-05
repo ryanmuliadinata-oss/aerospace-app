@@ -1,6 +1,3 @@
-
-Copy
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { fetchRouteAirQuality } from '../api/airQualityApi';
@@ -403,6 +400,92 @@ export default function SimulationScreen({ route, navigation }) {
         ))}
       </View>
  
+      {/* Fuel Optimization Engine */}
+      {report.fuelOptimization && (
+        <View style={s.card}>
+          <Text style={s.cardTitle}>⚡  FUEL OPTIMIZATION ENGINE</Text>
+ 
+          {/* Savings hero banner */}
+          <View style={s.foptBanner}>
+            <View style={s.foptBannerLeft}>
+              <Text style={s.foptSavedKg}>
+                {report.fuelOptimization.fuelSavedKg > 0
+                  ? `−${Math.round(report.fuelOptimization.fuelSavedKg)} kg`
+                  : 'Optimal'}
+              </Text>
+              <Text style={s.foptSavedLbl}>FUEL SAVED</Text>
+            </View>
+            <View style={s.foptDivider} />
+            <View style={s.foptBannerMid}>
+              <Text style={s.foptSavedKg} numberOfLines={1}>
+                {report.fuelOptimization.costSavedUsd > 0
+                  ? `$${Math.round(report.fuelOptimization.costSavedUsd).toLocaleString()}`
+                  : '$0'}
+              </Text>
+              <Text style={s.foptSavedLbl}>USD SAVED</Text>
+            </View>
+            <View style={s.foptDivider} />
+            <View style={s.foptBannerRight}>
+              <Text style={s.foptOptFL}>
+                FL{report.fuelOptimization.optimalFL}
+              </Text>
+              <Text style={s.foptSavedLbl}>OPTIMAL FL</Text>
+            </View>
+          </View>
+ 
+          {/* Recommendation text */}
+          <View style={s.foptRec}>
+            <Text style={s.foptRecText}>{report.fuelOptimization.recommendation}</Text>
+          </View>
+ 
+          {/* Step climb advice if applicable */}
+          {report.fuelOptimization.stepClimbRecommended && (
+            <View style={s.foptStepCard}>
+              <Text style={s.foptStepIcon}>📈</Text>
+              <Text style={s.foptStepText}>{report.fuelOptimization.stepClimbAdvice}</Text>
+            </View>
+          )}
+ 
+          {/* FL comparison table */}
+          <Text style={s.foptTableTitle}>FL COMPARISON</Text>
+          <View style={s.foptTableHeader}>
+            <Text style={[s.foptTh, { width: 40 }]}>FL</Text>
+            <Text style={[s.foptTh, { flex: 1 }]}>FUEL kg</Text>
+            <Text style={[s.foptTh, { flex: 1 }]}>GS kts</Text>
+            <Text style={[s.foptTh, { flex: 1 }]}>WIND</Text>
+            <Text style={[s.foptTh, { flex: 1, textAlign: 'right' }]}>COST $</Text>
+          </View>
+          {report.fuelOptimization.flightLevels.map((fl, i) => {
+            const isOptimal = fl.flightLevel === report.fuelOptimization.optimalFL;
+            return (
+              <View key={i} style={[s.foptRow, isOptimal && s.foptRowOptimal]}>
+                <Text style={[s.foptFl, isOptimal && { color: '#00FF88' }, { width: 40 }]}>
+                  {isOptimal ? '★' : ''} FL{fl.flightLevel}
+                </Text>
+                <Text style={[s.foptTd, { flex: 1 }, isOptimal && { color: '#fff' }]}>
+                  {Math.round(fl.blockFuelKg).toLocaleString()}
+                </Text>
+                <Text style={[s.foptTd, { flex: 1 }, isOptimal && { color: '#fff' }]}>
+                  {Math.round(fl.groundSpeedKts)}
+                </Text>
+                <Text style={[s.foptTd, { flex: 1 },
+                  fl.headwindKts > 0
+                    ? { color: '#FF8C00' }
+                    : { color: '#00FF88' }]}>
+                  {fl.headwindKts > 0
+                    ? `HW ${Math.round(fl.headwindKts)}`
+                    : `TW ${Math.round(Math.abs(fl.headwindKts))}`}
+                </Text>
+                <Text style={[s.foptTd, { flex: 1, textAlign: 'right' },
+                  isOptimal && { color: '#fff' }]}>
+                  ${Math.round(fl.costUsd).toLocaleString()}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      )}
+ 
       {/* Wind Layers */}
       <View style={[s.card, { marginBottom:40 }]}>
         <Text style={s.cardTitle}>🌬  UPPER WINDS (Open-Meteo)</Text>
@@ -526,7 +609,37 @@ const s = StyleSheet.create({
   altReason:  { color:'#445566', fontSize:10, marginTop:2 },
   altDist:    { color:'#FFD700', fontWeight:'700', fontSize:13 },
   graphSub: { color:'#445566', fontSize:10, textAlign:'center', marginTop:6 },
-  // Air Quality
+  // Fuel Optimization
+  foptBanner:      { flexDirection:'row', backgroundColor:'#0D1526',
+                     borderRadius:10, padding:12, marginBottom:12,
+                     borderWidth:1, borderColor:'#00FF8822' },
+  foptBannerLeft:  { flex:1, alignItems:'center' },
+  foptBannerMid:   { flex:1, alignItems:'center' },
+  foptBannerRight: { flex:1, alignItems:'center' },
+  foptDivider:     { width:1, backgroundColor:'#1F2937', marginHorizontal:8 },
+  foptSavedKg:     { color:'#00FF88', fontSize:18, fontWeight:'800' },
+  foptOptFL:       { color:'#00D4FF', fontSize:18, fontWeight:'800' },
+  foptSavedLbl:    { color:'#445566', fontSize:8, letterSpacing:1.5, marginTop:3 },
+  foptRec:         { backgroundColor:'#111827', borderRadius:8, padding:10,
+                     marginBottom:10, borderWidth:1, borderColor:'#1F2937' },
+  foptRecText:     { color:'#8899AA', fontSize:11, lineHeight:17 },
+  foptStepCard:    { flexDirection:'row', alignItems:'flex-start', gap:8,
+                     backgroundColor:'#FFD70012', borderRadius:8, padding:10,
+                     marginBottom:10, borderWidth:1, borderColor:'#FFD70033' },
+  foptStepIcon:    { fontSize:14 },
+  foptStepText:    { color:'#FFD700', fontSize:11, flex:1, lineHeight:16 },
+  foptTableTitle:  { color:'#334455', fontSize:9, letterSpacing:2,
+                     fontWeight:'700', marginBottom:6 },
+  foptTableHeader: { flexDirection:'row', paddingBottom:6,
+                     borderBottomWidth:1, borderBottomColor:'#1F2937',
+                     marginBottom:2 },
+  foptTh:          { color:'#334455', fontSize:9, fontWeight:'700',
+                     letterSpacing:1 },
+  foptRow:         { flexDirection:'row', alignItems:'center', paddingVertical:7,
+                     borderBottomWidth:1, borderBottomColor:'#0F1520' },
+  foptRowOptimal:  { backgroundColor:'#00FF8808' },
+  foptFl:          { color:'#667788', fontSize:11, fontWeight:'700' },
+  foptTd:          { color:'#667788', fontSize:11 },
   aqHeader:    { flexDirection:'row', justifyContent:'space-between',
                  alignItems:'center', marginBottom:14 },
   aqEmpty:     { color:'#445566', fontSize:12, textAlign:'center', padding:8 },

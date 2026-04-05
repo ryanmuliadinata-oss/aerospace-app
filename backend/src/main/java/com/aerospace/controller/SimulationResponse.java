@@ -1,11 +1,13 @@
 package com.aerospace.controller;
-
+ 
 import com.aerospace.model.FlightSimulationReport;
 import com.aerospace.model.FuelReport;
-
+import com.aerospace.service.FuelOptimizationService.FuelOptimizationResult;
+import com.aerospace.service.FuelOptimizationService.FlightLevelOption;
+ 
 import java.util.ArrayList;
 import java.util.List;
-
+ 
 public class SimulationResponse {
     public String               flightId;
     public String               origin;
@@ -22,7 +24,8 @@ public class SimulationResponse {
     public List<WindPoint>      windLayers;
     public List<AlternateAirport> alternates = new ArrayList<>();
     public List<NotamEntry>     notams     = new ArrayList<>();
-public SunriseSunsetEntry sunriseSunset;
+    public SunriseSunsetEntry   sunriseSunset;
+    public FuelOptEntry         fuelOptimization;
     public static SimulationResponse from(FlightSimulationReport r) {
         SimulationResponse res     = new SimulationResponse();
         res.flightId               = r.flightPlan.flightId;
@@ -33,29 +36,29 @@ public SunriseSunsetEntry sunriseSunset;
         res.recommendedAltitude    = r.recommendedAltitude;
         res.goNoGoDecision         = r.goNoGoDecision;
         res.isGo                   = r.goNoGoDecision.startsWith("GO");
-
+ 
         FuelReport f = r.fuelReport;
         res.fuel = new FuelSummary(
             f.estimatedFuelBurnKg, f.reserveFuelKg,
             f.totalFuelRequiredKg, f.fuelOnBoardKg,
             f.fuelSufficient);
-
+ 
         res.weather = r.weatherReports.stream().map(w -> new WxPoint(
             w.waypoint.name, w.windSpeedKts, w.windDirectionDeg,
             w.temperatureCelsius, w.pressureHpa,
             w.flightCategory, w.rawMetar, w.sigmetAlert)).toList();
-
+ 
         res.turbulence = r.turbulenceReports.stream().map(t -> new TurbPoint(
             t.waypoint.name, t.severity,
             t.altitudeFt, t.source)).toList();
-
+ 
         res.windLayers = r.windLayers.stream().map(wl -> new WindPoint(
             wl.altitudeFt, wl.speedKts,
             wl.directionDeg, wl.temperatureCelsius)).toList();
-
+ 
         res.alternates = r.alternates.stream().map(a -> new AlternateAirport(
             a.icao(), a.name(), a.reason(), a.distanceNm())).toList();
-
+ 
         res.notams = r.notams.stream().map(n -> new NotamEntry(
             n.number(), n.text(), n.effectiveStart(),
             n.effectiveEnd(), n.classification())).toList();
@@ -69,31 +72,44 @@ if (r.sunriseSunset != null) {
         r.sunriseSunset.civilTwilightBegin(),
         r.sunriseSunset.civilTwilightEnd());
 }
+        if (r.fuelOptimization != null) {
+            FuelOptimizationResult fo = r.fuelOptimization;
+            List<FuelOptEntry.FLOption> levels = fo.flightLevels.stream()
+                .map(l -> new FuelOptEntry.FLOption(
+                    l.flightLevel(), l.blockFuelKg(), l.flightTimeHrs(),
+                    l.costUsd(), l.headwindKts(), l.tempCelsius(),
+                    l.tempDeviationC(), l.groundSpeedKts()))
+                .toList();
+            res.fuelOptimization = new FuelOptEntry(
+                levels, fo.optimalFL, fo.fuelSavedKg, fo.costSavedUsd,
+                fo.optimalBlockFuelKg, fo.recommendation,
+                fo.stepClimbRecommended, fo.stepClimbAdvice);
+        }
         return res;
     }
-
+ 
     public record FuelSummary(
         double burnKg, double reserveKg,
         double totalRequiredKg, double onBoardKg,
         boolean sufficient) {}
-
+ 
     public record WxPoint(
         String icao, double windSpeedKts, double windDirDeg,
         double tempC, double pressureHpa, String category,
         String rawMetar, boolean sigmet) {}
-
+ 
     public record TurbPoint(
         String icao, String severity,
         double altitudeFt, String source) {}
-
+ 
     public record WindPoint(
         double altitudeFt, double speedKts,
         double dirDeg, double tempC) {}
-
+ 
     public record AlternateAirport(
         String icao, String name,
         String reason, double distanceNm) {}
-
+ 
     public record NotamEntry(
         String number, String text,
         String effectiveStart, String effectiveEnd,
@@ -102,4 +118,26 @@ if (r.sunriseSunset != null) {
     String sunrise, String sunset,
     String solarNoon, int dayLengthSeconds,
     String civilTwilightBegin, String civilTwilightEnd) {}
+ 
+    public record FuelOptEntry(
+        List<FLOption> flightLevels,
+        int    optimalFL,
+        double fuelSavedKg,
+        double costSavedUsd,
+        double optimalBlockFuelKg,
+        String recommendation,
+        boolean stepClimbRecommended,
+        String  stepClimbAdvice
+    ) {
+        public record FLOption(
+            int    flightLevel,
+            double blockFuelKg,
+            double flightTimeHrs,
+            double costUsd,
+            double headwindKts,
+            double tempCelsius,
+            double tempDeviationC,
+            double groundSpeedKts
+        ) {}
+    }
 }
