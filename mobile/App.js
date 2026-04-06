@@ -10,19 +10,21 @@ import MapScreen        from './screens/MapScreen';
 import WeightBalanceScreen from './screens/WeightBalanceScreen';
 import GreatCircleScreen from './screens/GreatCircleScreen';
 import RunwayScreen from './screens/RunwayScreen';
+import EtopsScreen from './screens/EtopsScreen';
 const Tab = createBottomTabNavigator();
-
+ 
 const ICONS = {
   'Flight Plan': '✈️',
   'Simulation':  '🛰️',
   'Dashboard':   '📊',
   'Map':         '🗺️',
-  'History': '📋',
-  'W&B': '⚖️',
-  'Route': '🌍',
-  'Runway': '🛬',
+  'History':     '📋',
+  'W&B':         '⚖️',
+  'Route':       '🌍',
+  'Runway':      '🛬',
+  'ETOPS':       '🛡️',
 };
-
+ 
 export default function App() {
   return (
     <>
@@ -55,6 +57,7 @@ export default function App() {
           <Tab.Screen name="W&B" component={WeightBalanceScreen} />
           <Tab.Screen name="Route" component={GreatCircleScreen} />
           <Tab.Screen name="Runway" component={RunwayScreen} />
+          <Tab.Screen name="ETOPS"  component={EtopsScreen}  />
         </Tab.Navigator>
       </NavigationContainer>
     </>
