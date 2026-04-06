@@ -1,103 +1,117 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet,
-  TouchableOpacity, Alert
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { C, S, T } from '../theme';
+ 
 const HISTORY_KEY = 'flight_history';
-
-export default function HistoryScreen() {
+ 
+export default function HistoryScreen({ navigation }) {
   const [history, setHistory] = useState([]);
-
+ 
   useEffect(() => {
     loadHistory();
   }, []);
-
+ 
   const loadHistory = async () => {
     try {
       const raw = await AsyncStorage.getItem(HISTORY_KEY);
-      if (raw) setHistory(JSON.parse(raw));
-    } catch (e) {
-      console.error('Failed to load history', e);
-    }
+      const data = raw ? JSON.parse(raw) : [];
+      setHistory(data.reverse());
+    } catch (e) { console.error('Failed to load history', e); }
   };
-
-  const clearHistory = async () => {
+ 
+  const clearHistory = () => {
     Alert.alert('Clear History', 'Delete all saved simulations?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive',
-        onPress: async () => {
-          await AsyncStorage.removeItem(HISTORY_KEY);
-          setHistory([]);
-        }
-      }
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        await AsyncStorage.removeItem(HISTORY_KEY);
+        setHistory([]);
+      }},
     ]);
   };
-
-  if (history.length === 0) {
-    return (
-      <View style={s.empty}>
-        <Text style={s.emptyIcon}>📋</Text>
-        <Text style={s.emptyTitle}>No History Yet</Text>
-        <Text style={s.emptySub}>Your past simulations will appear here.</Text>
-      </View>
-    );
-  }
-
+ 
   return (
-    <ScrollView style={s.container}>
-      <TouchableOpacity style={s.clearBtn} onPress={clearHistory}>
-        <Text style={s.clearText}>🗑️  CLEAR HISTORY</Text>
-      </TouchableOpacity>
-
-      {history.slice().reverse().map((item, i) => (
-        <View key={i} style={s.card}>
-          <View style={s.cardHeader}>
-            <Text style={[s.decision,
-              { color: item.isGo ? '#00FF88' : '#FF3333' }]}>
-              {item.isGo ? '✅ GO' : '❌ NO-GO'}
-            </Text>
-            <Text style={s.date}>{item.date}</Text>
-          </View>
-          <View style={s.routeRow}>
-            <Text style={s.icao}>{item.origin}</Text>
-            <Text style={s.arrow}>— ✈ —</Text>
-            <Text style={s.icao}>{item.destination}</Text>
-          </View>
-          <View style={s.details}>
-            <Text style={s.detail}>🛩️ {item.aircraftType}</Text>
-            <Text style={s.detail}>⏱️ {item.estimatedFlightTimeHrs?.toFixed(1)} hr</Text>
-            <Text style={s.detail}>⛽ {item.fuel?.sufficient ? 'Fuel OK' : 'Fuel LOW'}</Text>
-          </View>
+    <ScrollView style={S.scroll} showsVerticalScrollIndicator={false}>
+      <View style={[S.titleBlock, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }]}>
+        <View>
+          <Text style={[T.screenLabel, { marginBottom: 4 }]}>LOGBOOK</Text>
+          <Text style={T.screenTitle}>History</Text>
         </View>
-      ))}
+        {history.length > 0 && (
+          <TouchableOpacity onPress={clearHistory} style={styles.clearBtn}>
+            <Text style={styles.clearText}>Clear all</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+ 
+      {history.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyIcon}>📋</Text>
+          <Text style={styles.emptyTitle}>No simulations yet</Text>
+          <Text style={styles.emptySub}>Run a simulation from the Flight Plan tab.</Text>
+        </View>
+      ) : (
+        history.map((item, i) => (
+          <TouchableOpacity key={i} style={[S.card,
+            item.isGo ? S.cardGreen : styles.cardRed]}
+            onPress={() => navigation.navigate('Simulation', { report: item })}>
+            <View style={styles.histHeader}>
+              <View>
+                <Text style={styles.flightId}>{item.flightId}</Text>
+                <Text style={styles.date}>{item.date}</Text>
+              </View>
+              <View style={[styles.goBadge, {
+                backgroundColor: item.isGo ? C.greenFaint : C.redFaint,
+                borderColor:     item.isGo ? C.greenDim   : C.redDim,
+              }]}>
+                <Text style={[styles.goBadgeText, { color: item.isGo ? C.green : C.red }]}>
+                  {item.isGo ? 'GO' : 'NO-GO'}
+                </Text>
+              </View>
+            </View>
+            <View style={S.divider} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View>
+                <Text style={styles.routeIcao}>{item.origin}</Text>
+                <Text style={[T.screenLabel, { fontSize: 9 }]}>ORIGIN</Text>
+              </View>
+              <Text style={{ color: C.textDim, fontSize: 18, alignSelf: 'center' }}>→</Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.routeIcao}>{item.destination}</Text>
+                <Text style={[T.screenLabel, { fontSize: 9, textAlign: 'right' }]}>DEST</Text>
+              </View>
+            </View>
+            <View style={[S.divider, { marginBottom: 4 }]} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.meta}>{item.aircraftType}</Text>
+              <Text style={styles.meta}>{item.estimatedFlightTimeHrs?.toFixed(1)} hrs</Text>
+              <Text style={styles.meta}>{item.recommendedAltitude}</Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      )}
+      <View style={{ height: 48 }} />
     </ScrollView>
   );
 }
-
-const s = StyleSheet.create({
-  container:  { flex:1, backgroundColor:'#0A0E1A', padding:16 },
-  empty:      { flex:1, backgroundColor:'#0A0E1A',
-                alignItems:'center', justifyContent:'center', padding:32 },
-  emptyIcon:  { fontSize:64, marginBottom:16 },
-  emptyTitle: { color:'#FFF', fontSize:20, fontWeight:'700' },
-  emptySub:   { color:'#556', fontSize:14, marginTop:8, textAlign:'center' },
-  clearBtn:   { backgroundColor:'#FF333318', borderRadius:10, padding:12,
-                alignItems:'center', marginBottom:16,
-                borderWidth:1, borderColor:'#FF333344' },
-  clearText:  { color:'#FF3333', fontWeight:'700', fontSize:12, letterSpacing:1 },
-  card:       { backgroundColor:'#111827', borderRadius:14, padding:16,
-                marginBottom:12, borderWidth:1, borderColor:'#1F2937' },
-  cardHeader: { flexDirection:'row', justifyContent:'space-between',
-                marginBottom:10 },
-  decision:   { fontWeight:'800', fontSize:14 },
-  date:       { color:'#445566', fontSize:11 },
-  routeRow:   { flexDirection:'row', alignItems:'center',
-                justifyContent:'center', gap:12, marginBottom:10 },
-  icao:       { color:'#FFF', fontSize:24, fontWeight:'800' },
-  arrow:      { color:'#00D4FF', fontSize:14 },
-  details:    { flexDirection:'row', justifyContent:'space-around' },
-  detail:     { color:'#667788', fontSize:12 },
+ 
+const styles = StyleSheet.create({
+  clearBtn:       { paddingHorizontal: 12, paddingVertical: 6,
+                    borderRadius: 8, backgroundColor: C.redFaint,
+                    borderWidth: 1, borderColor: C.redDim },
+  clearText:      { color: C.red, fontSize: 11, fontWeight: '600' },
+  emptyState:     { alignItems: 'center', paddingTop: 80 },
+  emptyIcon:      { fontSize: 48, marginBottom: 16 },
+  emptyTitle:     { color: C.textPrimary, fontSize: 18, fontWeight: '700' },
+  emptySub:       { color: C.textMuted, fontSize: 13, marginTop: 8, textAlign: 'center' },
+  cardRed:        { borderColor: C.redDim },
+  histHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  flightId:       { color: C.textPrimary, fontSize: 15, fontWeight: '700' },
+  date:           { color: C.textMuted, fontSize: 10, marginTop: 2 },
+  goBadge:        { paddingHorizontal: 10, paddingVertical: 4,
+                    borderRadius: 100, borderWidth: 1 },
+  goBadgeText:    { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
+  routeIcao:      { color: C.textPrimary, fontSize: 20, fontWeight: '800' },
+  meta:           { color: C.textMuted, fontSize: 11 },
 });
+ 

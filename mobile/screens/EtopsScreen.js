@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { C, S, T } from '../theme';
 import {
   View, Text, ScrollView, StyleSheet, TextInput,
   TouchableOpacity, ActivityIndicator, Alert,
@@ -257,13 +258,13 @@ export default function EtopsScreen() {
               <Text style={s.metricLbl}>WORST DIVERSION</Text>
             </View>
             <View style={s.metric}>
-              <Text style={[s.metricVal, { color: '#00D4FF' }]}>
+              <Text style={[s.metricVal, { color: C.cyan }]}>
                 ETOPS-{result.requiredRatingMinutes}
               </Text>
               <Text style={s.metricLbl}>REQUIRED RATING</Text>
             </View>
             <View style={s.metric}>
-              <Text style={[s.metricVal, { color: '#FFD700' }]}>
+              <Text style={[s.metricVal, { color: C.gold }]}>
                 {result.seSpeedKts} kts
               </Text>
               <Text style={s.metricLbl}>SE SPEED</Text>
@@ -341,7 +342,7 @@ export default function EtopsScreen() {
           </View>
           {result.alternates.map((alt, i) => (
             <View key={i} style={s.tableRow}>
-              <Text style={[s.td, { width: 44, color: '#FFD700', fontWeight: '700' }]}>
+              <Text style={[s.td, { width: 44, color: C.gold, fontWeight: '700' }]}>
                 {alt.icao}
               </Text>
               <Text style={[s.td, { flex: 1 }]} numberOfLines={1}>{alt.name}</Text>
@@ -372,7 +373,7 @@ export default function EtopsScreen() {
               <Text style={[s.td, { flex: 1 }]}>
                 {rp.lat.toFixed(1)}° {rp.lon.toFixed(1)}°
               </Text>
-              <Text style={[s.td, { width: 56, color: '#FFD700' }]}>
+              <Text style={[s.td, { width: 56, color: C.gold }]}>
                 {rp.nearestAlternateIcao}
               </Text>
               <Text style={[s.td, { width: 52, textAlign: 'right',
@@ -392,74 +393,74 @@ export default function EtopsScreen() {
 }
  
 const s = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: '#0A0E1A', padding: 16 },
-  sectionTitle:     { color: '#00D4FF', fontSize: 11, fontWeight: '700',
+  container:        { flex: 1, backgroundColor: C.bgBase, padding: 16 },
+  sectionTitle:     { color: C.cyan, fontSize: 11, fontWeight: '700',
                       letterSpacing: 2.5, marginTop: 24, marginBottom: 12 },
   // Presets
-  presetCard:       { backgroundColor: '#111827', borderRadius: 10, padding: 12,
-                      marginBottom: 8, borderWidth: 1, borderColor: '#1F2937' },
+  presetCard:       { backgroundColor: C.bgCard, borderRadius: 14, padding: 12,
+                      marginBottom: 8, borderWidth: 1, borderColor: C.border },
   presetCardActive: { borderColor: '#00D4FF', backgroundColor: '#00D4FF0A' },
-  presetLabel:      { color: '#667788', fontSize: 13, fontWeight: '600' },
-  presetLabelActive:{ color: '#00D4FF' },
-  presetWp:         { color: '#334455', fontSize: 10, marginTop: 3 },
+  presetLabel:      { color: C.textMuted, fontSize: 13, fontWeight: '600' },
+  presetLabelActive:{ color: C.cyan },
+  presetWp:         { color: C.textDim, fontSize: 10, marginTop: 3 },
   // Tags
   tagRow:           { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
-  tag:              { backgroundColor: '#111827', borderRadius: 8,
+  tag:              { backgroundColor: C.bgCard, borderRadius: 8,
                       paddingHorizontal: 12, paddingVertical: 7,
-                      borderWidth: 1, borderColor: '#1F2937' },
+                      borderWidth: 1, borderColor: C.border },
   tagActive:        { borderColor: '#00D4FF', backgroundColor: '#00D4FF18' },
   tagActiveGold:    { borderColor: '#FFD700', backgroundColor: '#FFD70018' },
-  tagText:          { color: '#667788', fontSize: 11, fontWeight: '600' },
-  tagTextActive:    { color: '#00D4FF' },
-  tagTextGold:      { color: '#FFD700' },
+  tagText:          { color: C.textMuted, fontSize: 11, fontWeight: '600' },
+  tagTextActive:    { color: C.cyan },
+  tagTextGold:      { color: C.gold },
   // Info
-  infoCard:         { backgroundColor: '#0D1526', borderRadius: 10, padding: 12,
-                      marginBottom: 16, borderWidth: 1, borderColor: '#1F2937' },
-  infoText:         { color: '#445566', fontSize: 11, lineHeight: 17 },
+  infoCard:         { backgroundColor: C.bgDark, borderRadius: 14, padding: 12,
+                      marginBottom: 16, borderWidth: 1, borderColor: C.border },
+  infoText:         { color: C.textDim, fontSize: 11, lineHeight: 17 },
   // Button
-  btn:              { backgroundColor: '#00D4FF', borderRadius: 12, padding: 16,
+  btn:              { backgroundColor: '#00D4FF', borderRadius: 16, padding: 16,
                       alignItems: 'center', marginBottom: 16 },
   btnDisabled:      { opacity: 0.4 },
   btnText:          { color: '#000919', fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
   // Banner
-  banner:           { borderRadius: 12, padding: 16, marginBottom: 14,
+  banner:           { borderRadius: 16, padding: 16, marginBottom: 14,
                       flexDirection: 'row', alignItems: 'center', gap: 12 },
   bannerGo:         { backgroundColor: '#00FF8818', borderWidth: 1, borderColor: '#00FF88' },
   bannerNogo:       { backgroundColor: '#FF333318', borderWidth: 1, borderColor: '#FF3333' },
   bannerIcon:       { fontSize: 22 },
   bannerText:       { color: '#fff', fontSize: 14, fontWeight: '800', flex: 1, letterSpacing: 1 },
   // Card
-  card:             { backgroundColor: '#111827', borderRadius: 14, padding: 16,
-                      marginBottom: 14, borderWidth: 1, borderColor: '#1F2937' },
-  cardTitle:        { color: '#00D4FF', fontSize: 11, fontWeight: '700',
+  card:             { backgroundColor: C.bgCard, borderRadius: 18, padding: 16,
+                      marginBottom: 14, borderWidth: 1, borderColor: C.border },
+  cardTitle:        { color: C.cyan, fontSize: 11, fontWeight: '700',
                       letterSpacing: 2.5, marginBottom: 14 },
   // Metrics
   metricRow:        { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14 },
   metric:           { alignItems: 'center' },
   metricVal:        { fontSize: 18, fontWeight: '800' },
-  metricLbl:        { color: '#445566', fontSize: 8, letterSpacing: 1.5, marginTop: 4 },
-  assessCard:       { backgroundColor: '#0D1526', borderRadius: 8, padding: 10,
-                      borderWidth: 1, borderColor: '#1F2937' },
-  assessText:       { color: '#8899AA', fontSize: 11, lineHeight: 17 },
+  metricLbl:        { color: C.textDim, fontSize: 8, letterSpacing: 1.5, marginTop: 4 },
+  assessCard:       { backgroundColor: C.bgDark, borderRadius: 8, padding: 10,
+                      borderWidth: 1, borderColor: C.border },
+  assessText:       { color: C.textSecondary, fontSize: 11, lineHeight: 17 },
   // Map
   mapSvg:           { borderRadius: 8, overflow: 'hidden' },
   mapLegend:        { flexDirection: 'row', gap: 14, marginTop: 10 },
   legendItem:       { flexDirection: 'row', alignItems: 'center', gap: 5 },
   legendDot:        { width: 8, height: 8, borderRadius: 4 },
-  legendText:       { color: '#667788', fontSize: 10 },
+  legendText:       { color: C.textMuted, fontSize: 10 },
   // Data rows
   dataRow:          { flexDirection: 'row', justifyContent: 'space-between',
-                      paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#1F2937' },
-  dataLbl:          { color: '#667788', fontSize: 11 },
+                      paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.border },
+  dataLbl:          { color: C.textMuted, fontSize: 11 },
   dataVal:          { color: '#fff', fontSize: 11, fontWeight: '600',
                       flex: 1, textAlign: 'right' },
   // Table
   tableHeader:      { flexDirection: 'row', paddingBottom: 6,
-                      borderBottomWidth: 1, borderBottomColor: '#1F2937', marginBottom: 2 },
+                      borderBottomWidth: 1, borderBottomColor: C.border, marginBottom: 2 },
   tableRow:         { flexDirection: 'row', alignItems: 'center',
                       paddingVertical: 7, borderBottomWidth: 1,
-                      borderBottomColor: '#0F1520' },
-  th:               { color: '#334455', fontSize: 9, fontWeight: '700', letterSpacing: 1 },
-  td:               { color: '#8899AA', fontSize: 11 },
+                      borderBottomColor: 'rgba(255,255,255,0.04)' },
+  th:               { color: C.textDim, fontSize: 9, fontWeight: '700', letterSpacing: 1 },
+  td:               { color: C.textSecondary, fontSize: 11 },
 });
  

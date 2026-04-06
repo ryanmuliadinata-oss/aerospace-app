@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { C, S, T } from '../theme';
 import {
   View, Text, ScrollView, StyleSheet, TextInput,
   TouchableOpacity, Alert, Dimensions,
@@ -417,15 +418,15 @@ export default function WeightBalanceScreen() {
         <View style={s.card}>
           <Text style={s.cardTitle}>📐  CG ENVELOPE</Text>
           <CgEnvelope aircraft={aircraft} dots={[
-            { mac: result.zfCg, ton: result.zfw / 1000, color: '#00D4FF', label: 'ZFW' },
-            { mac: result.toCg, ton: result.tow / 1000, color: '#00FF88', label: 'TOW' },
-            { mac: result.ldCg, ton: result.ldw / 1000, color: '#FFD700', label: 'LDW' },
+            { mac: result.zfCg, ton: result.zfw / 1000, color: C.cyan, label: 'ZFW' },
+            { mac: result.toCg, ton: result.tow / 1000, color: C.green, label: 'TOW' },
+            { mac: result.ldCg, ton: result.ldw / 1000, color: C.gold, label: 'LDW' },
           ]} />
           <View style={s.cgLegend}>
             {[
-              { color: '#00D4FF', label: `ZFW  ${result.zfCg.toFixed(1)}% MAC`, ok: result.checks.cgZeroFuel },
-              { color: '#00FF88', label: `TOW  ${result.toCg.toFixed(1)}% MAC`, ok: result.checks.cgTakeoff },
-              { color: '#FFD700', label: `LDW  ${result.ldCg.toFixed(1)}% MAC`, ok: result.checks.cgLanding },
+              { color: C.cyan, label: `ZFW  ${result.zfCg.toFixed(1)}% MAC`, ok: result.checks.cgZeroFuel },
+              { color: C.green, label: `TOW  ${result.toCg.toFixed(1)}% MAC`, ok: result.checks.cgTakeoff },
+              { color: C.gold, label: `LDW  ${result.ldCg.toFixed(1)}% MAC`, ok: result.checks.cgLanding },
             ].map(({ color, label, ok }) => (
               <View key={label} style={s.cgLegendItem}>
                 <View style={[s.cgLegendDot, { backgroundColor: color }]} />
@@ -476,7 +477,7 @@ export default function WeightBalanceScreen() {
             </View>
           ))}
           <View style={[s.breakRow, { borderTopWidth: 1, borderTopColor: '#00D4FF33', marginTop: 4 }]}>
-            <Text style={[s.breakLabel, { color: '#00D4FF' }]}>TOTAL PAX</Text>
+            <Text style={[s.breakLabel, { color: C.cyan }]}>TOTAL PAX</Text>
             <Text style={s.breakSub}>{result.totalPax} / {d.maxPax}</Text>
             <Text style={[s.breakValue, { color: result.checks.paxCount ? '#00FF88' : '#FF3333' }]}>
               {Math.round(result.paxKg).toLocaleString()} kg
@@ -524,68 +525,69 @@ export default function WeightBalanceScreen() {
 }
  
 const s = StyleSheet.create({
-  container:    { flex: 1, backgroundColor: '#0A0E1A', padding: 16 },
-  sectionTitle: { color: '#00D4FF', fontSize: 11, fontWeight: '700',
+  container:    { flex: 1, backgroundColor: C.bgBase, padding: 16 },
+  sectionTitle: { color: C.cyan, fontSize: 11, fontWeight: '700',
                   letterSpacing: 2.5, marginTop: 24, marginBottom: 12 },
   presetRow:    { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
-  acBtn:        { backgroundColor: '#111827', borderRadius: 8,
+  acBtn:        { backgroundColor: C.bgCard, borderRadius: 8,
                   paddingHorizontal: 14, paddingVertical: 9,
-                  borderWidth: 1, borderColor: '#1F2937' },
+                  borderWidth: 1, borderColor: C.border },
   acBtnActive:  { borderColor: '#00D4FF', backgroundColor: '#00D4FF18' },
-  acText:       { color: '#667788', fontSize: 12, fontWeight: '600' },
-  acTextActive: { color: '#00D4FF' },
+  acText:       { color: C.textMuted, fontSize: 12, fontWeight: '600' },
+  acTextActive: { color: C.cyan },
   zoneRow:      { flexDirection: 'row', alignItems: 'center', marginBottom: 10,
-                  backgroundColor: '#111827', borderRadius: 10, padding: 12,
-                  borderWidth: 1, borderColor: '#1F2937' },
+                  backgroundColor: C.bgCard, borderRadius: 14, padding: 12,
+                  borderWidth: 1, borderColor: C.border },
   zoneInfo:     { flex: 1 },
   zoneLabel:    { color: '#fff', fontSize: 12, fontWeight: '600' },
-  zoneSub:      { color: '#445566', fontSize: 10, marginTop: 2 },
-  zoneInput:    { backgroundColor: '#0A0E1A', color: '#fff', borderRadius: 8,
-                  padding: 10, fontSize: 14, borderWidth: 1, borderColor: '#1F2937',
+  zoneSub:      { color: C.textDim, fontSize: 10, marginTop: 2 },
+  zoneInput:    { backgroundColor: C.bgBase, color: '#fff', borderRadius: 8,
+                  padding: 10, fontSize: 14, borderWidth: 1, borderColor: C.border,
                   width: 70, textAlign: 'center' },
   field:        { marginBottom: 12 },
-  label:        { color: '#667788', fontSize: 11, marginBottom: 6, letterSpacing: 1 },
-  input:        { backgroundColor: '#111827', color: '#fff', borderRadius: 10,
-                  padding: 13, fontSize: 15, borderWidth: 1, borderColor: '#1F2937' },
-  btn:          { backgroundColor: '#00D4FF', borderRadius: 12, padding: 16,
+  label:        { color: C.textMuted, fontSize: 11, marginBottom: 6, letterSpacing: 1 },
+  input:        { backgroundColor: C.bgCard, color: '#fff', borderRadius: 14,
+                  padding: 13, fontSize: 15, borderWidth: 1, borderColor: C.border },
+  btn:          { backgroundColor: '#00D4FF', borderRadius: 16, padding: 16,
                   alignItems: 'center', marginTop: 8, marginBottom: 16 },
   btnText:      { color: '#000919', fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
-  shareBtn:     { backgroundColor: '#FFD70022', borderRadius: 12, padding: 14,
+  shareBtn:     { backgroundColor: '#FFD70022', borderRadius: 16, padding: 14,
                   alignItems: 'center', marginBottom: 14,
                   borderWidth: 1, borderColor: '#FFD70055' },
-  shareBtnText: { color: '#FFD700', fontWeight: '700', fontSize: 13, letterSpacing: 1 },
-  banner:       { borderRadius: 12, padding: 16, marginBottom: 16,
+  shareBtnText: { color: C.gold, fontWeight: '700', fontSize: 13, letterSpacing: 1 },
+  banner:       { borderRadius: 16, padding: 16, marginBottom: 16,
                   flexDirection: 'row', alignItems: 'center', gap: 12 },
   bannerGo:     { backgroundColor: '#00FF8818', borderWidth: 1, borderColor: '#00FF88' },
   bannerNogo:   { backgroundColor: '#FF333318', borderWidth: 1, borderColor: '#FF3333' },
   bannerIcon:   { fontSize: 22 },
   bannerText:   { color: '#fff', fontSize: 13, fontWeight: '700', flex: 1 },
-  card:         { backgroundColor: '#111827', borderRadius: 14, padding: 16,
-                  marginBottom: 14, borderWidth: 1, borderColor: '#1F2937' },
-  cardTitle:    { color: '#00D4FF', fontSize: 11, fontWeight: '700',
+  card:         { backgroundColor: C.bgCard, borderRadius: 18, padding: 16,
+                  marginBottom: 14, borderWidth: 1, borderColor: C.border },
+  cardTitle:    { color: C.cyan, fontSize: 11, fontWeight: '700',
                   letterSpacing: 2.5, marginBottom: 14 },
   statusRow:    { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 12 },
   statusLeft:   { flex: 1 },
-  statusLabel:  { color: '#667788', fontSize: 11, marginBottom: 6 },
+  statusLabel:  { color: C.textMuted, fontSize: 11, marginBottom: 6 },
   barTrack:     { height: 8, backgroundColor: '#1F2937', borderRadius: 4, overflow: 'hidden' },
   barFill:      { height: '100%', borderRadius: 4 },
   statusRight:  { alignItems: 'flex-end', width: 100 },
   statusValue:  { fontWeight: '700', fontSize: 12 },
-  statusMax:    { color: '#445566', fontSize: 10, marginTop: 2 },
+  statusMax:    { color: C.textDim, fontSize: 10, marginTop: 2 },
   cgLegend:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
   cgLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   cgLegendDot:  { width: 8, height: 8, borderRadius: 4 },
-  cgLegendText: { color: '#667788', fontSize: 10 },
+  cgLegendText: { color: C.textMuted, fontSize: 10 },
   cgDetailRow:  { flexDirection: 'row', alignItems: 'center', paddingVertical: 8,
-                  borderBottomWidth: 1, borderBottomColor: '#1F2937' },
-  cgDetailLabel:{ color: '#667788', fontSize: 12, width: 70 },
+                  borderBottomWidth: 1, borderBottomColor: C.border },
+  cgDetailLabel:{ color: C.textMuted, fontSize: 12, width: 70 },
   cgDetailArm:  { color: '#fff', fontSize: 11, width: 64 },
   cgDetailPct:  { fontSize: 12, fontWeight: '700', flex: 1 },
-  cgNote:       { color: '#334455', fontSize: 10, marginTop: 10, textAlign: 'center' },
+  cgNote:       { color: C.textDim, fontSize: 10, marginTop: 10, textAlign: 'center' },
   breakRow:     { flexDirection: 'row', alignItems: 'center', paddingVertical: 8,
-                  borderBottomWidth: 1, borderBottomColor: '#1F2937' },
-  breakLabel:   { color: '#667788', fontSize: 12, flex: 1 },
-  breakSub:     { color: '#334455', fontSize: 10, width: 70, textAlign: 'center' },
+                  borderBottomWidth: 1, borderBottomColor: C.border },
+  breakLabel:   { color: C.textMuted, fontSize: 12, flex: 1 },
+  breakSub:     { color: C.textDim, fontSize: 10, width: 70, textAlign: 'center' },
   breakValue:   { color: '#fff', fontWeight: '700', fontSize: 12,
                   width: 90, textAlign: 'right' },
 });
+ 
