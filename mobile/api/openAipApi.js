@@ -2,6 +2,9 @@ import { OPENAIP_API_KEY } from '../config';
  
 const OPENAIP_BASE = 'https://api.core.openaip.net/api';
  
+// Helper — degrees to radians
+const toRad = (deg) => deg * (Math.PI / 180);
+ 
 /**
  * Search for an airport by ICAO code.
  * Returns the airport object including runways, elevation, coordinates.
@@ -10,7 +13,7 @@ const OPENAIP_BASE = 'https://api.core.openaip.net/api';
  * @returns {Promise<AirportInfo|null>}
  */
 export const fetchAirportByIcao = async (icao) => {
-  if (!OPENAIP_API_KEY || OPENAIP_API_KEY === 'YOUR_OPENAIP_KEY_HERE') {
+  if (!OPENAIP_API_KEY || OPENAIP_API_KEY === '3086aa02851b9ba6032cada8104b97f7') {
     console.warn('[OpenAIP] No API key set in config.js');
     return null;
   }
@@ -83,8 +86,8 @@ export const bestRunwayForWind = (windDirDeg, windSpeedKts, runways) => {
     .filter(r => r.trueHeading != null)
     .map(r => {
       const angleDiff = windDirDeg - r.trueHeading;
-      const headwind  = windSpeedKts * Math.cos(Math.toRadians(angleDiff));
-      const crosswind = Math.abs(windSpeedKts * Math.sin(Math.toRadians(angleDiff)));
+      const headwind  = windSpeedKts * Math.cos(toRad(angleDiff));
+      const crosswind = Math.abs(windSpeedKts * Math.sin(toRad(angleDiff)));
       return { runway: r, headwindKts: +headwind.toFixed(1), crosswindKts: +crosswind.toFixed(1) };
     });
  
@@ -93,7 +96,3 @@ export const bestRunwayForWind = (windDirDeg, windSpeedKts, runways) => {
   // Best = lowest crosswind (and prefer headwind over tailwind)
   return scored.sort((a, b) => a.crosswindKts - b.crosswindKts)[0];
 };
- 
-// Helper — degrees to radians
-Math.toRadians = (deg) => deg * (Math.PI / 180);
- 
