@@ -1,7 +1,3 @@
-
-
-
-
 const OPENSKY_BASE = 'https://opensky-network.org/api';
  
 /**
@@ -21,8 +17,7 @@ export const fetchLiveAircraft = async (minLat, maxLat, minLon, maxLon) => {
  
     const res = await fetch(url, {
       headers: { Accept: 'application/json' },
-      // 10-second timeout via AbortController
-      signal: AbortSignal.timeout(10000),
+      // 10-second timeout via AbortController,
     });
  
     if (!res.ok) throw new Error(`OpenSky HTTP ${res.status}`);
@@ -82,7 +77,7 @@ export const fetchAircraftByIcao = async (icao24) => {
   try {
     const res = await fetch(
       `${OPENSKY_BASE}/states/all?icao24=${icao24.toLowerCase()}`,
-      { signal: AbortSignal.timeout(8000) }
+      { }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
