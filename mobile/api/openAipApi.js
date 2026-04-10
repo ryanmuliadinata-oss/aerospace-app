@@ -13,7 +13,7 @@ const toRad = (deg) => deg * (Math.PI / 180);
  * @returns {Promise<AirportInfo|null>}
  */
 export const fetchAirportByIcao = async (icao) => {
-  if (!OPENAIP_API_KEY || OPENAIP_API_KEY === '3086aa02851b9ba6032cada8104b97f7') {
+  if (!OPENAIP_API_KEY || OPENAIP_API_KEY === 'YOUR_OPENAIP_KEY_HERE') {
     console.warn('[OpenAIP] No API key set in config.js');
     return null;
   }
