@@ -15,7 +15,7 @@ export const C = {
   gradGreen:     ['#50DC8C22', '#1D6B4408'],
   gradPurple:    ['#9664FF22', '#5032B408'],
   gradBlue:      ['#4AA0FF22', '#1850A408'],
-  gradGold:      ['#FFD70022', '#A88000  08'],
+  gradGold:      ['#FFD70022', '#A8800008'],
  
   // Accent colors
   green:         '#50DC8C',

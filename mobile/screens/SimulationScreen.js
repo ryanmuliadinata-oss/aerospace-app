@@ -180,7 +180,7 @@ export default function SimulationScreen({ route, navigation }) {
               <View style={s.altLeft}>
                 <Text style={s.altIcao}>{alt.icao}</Text>
                 <Text style={s.altName}>{alt.name}</Text>
-                <Text style={s.altReason}>{alt.reason}</Text>
+                <Text style={s.altAirportReason}>{alt.reason}</Text>
               </View>
               <Text style={s.altDist}>{alt.distanceNm.toFixed(0)} nm</Text>
             </View>
@@ -585,7 +585,7 @@ const s = StyleSheet.create({
   altLeft:    { flex:1 },
   altIcao:    { color: C.textPrimary, fontWeight:'800', fontSize:16 },
   altName:    { color: C.textMuted, fontSize:11, marginTop:2 },
-  altReason:  { color: C.textDim, fontSize:10, marginTop:2 },
+  altAirportReason:  { color: C.textDim, fontSize:10, marginTop:2 },
   altDist:    { color: C.gold, fontWeight:'700', fontSize:13 },
   graphSub: { color: C.textDim, fontSize:10, textAlign:'center', marginTop:6 },
   fuelChart:       { flexDirection:'row', alignItems:'flex-end', height:120,
