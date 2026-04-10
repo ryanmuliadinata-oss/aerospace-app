@@ -45,7 +45,7 @@ export default function RunwayScreen() {
       const effectiveWindDir = bestRwy != null
         ? parseFloat(windDir) - (bestRwy.runway.trueHeading ?? 0)
         : parseFloat(windDir);
-      const res = await axios.post(`${API_BASE_URL}/runway`, {
+      const res = await axios.post(`${API_BASE_URL}/api/runway`, {
         aircraftType: aircraft,
         fuelKg: parseFloat(fuelKg), payloadKg: parseFloat(payloadKg),
         weather: {

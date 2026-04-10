@@ -158,7 +158,7 @@ export default function EtopsScreen() {
     setLoading(true);
     setResult(null);
     try {
-      const res = await axios.post(`${API_BASE_URL}/etops`, {
+      const res = await axios.post(`${API_BASE_URL}/api/etops`, {
         waypoints:    preset.waypoints,
         aircraftType: aircraft,
         etopsRating:  etopsRating,
