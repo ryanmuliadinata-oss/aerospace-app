@@ -18,7 +18,6 @@ export const fetchAirQuality = async (lat, lon, name = '') => {
     });
  
     const res = await fetch(`${AQ_BASE}?${params}`, {
-      signal: AbortSignal.timeout(8000),
     });
  
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -88,3 +87,4 @@ const aqiToColor = (aqi) => {
   if (aqi <= 100)    return '#FF3333';
   return '#CC0000';
 };
+ 

@@ -26,7 +26,6 @@ export const fetchAirportByIcao = async (icao) => {
           'x-openaip-api-key': OPENAIP_API_KEY,
           'Accept': 'application/json',
         },
-        signal: AbortSignal.timeout(10000),
       }
     );
  
@@ -96,3 +95,4 @@ export const bestRunwayForWind = (windDirDeg, windSpeedKts, runways) => {
   // Best = lowest crosswind (and prefer headwind over tailwind)
   return scored.sort((a, b) => a.crosswindKts - b.crosswindKts)[0];
 };
+ 

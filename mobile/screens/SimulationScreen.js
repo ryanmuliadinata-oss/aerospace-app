@@ -4,8 +4,6 @@ import { fetchRouteAirQuality } from '../api/airQualityApi';
 import { C, S, T } from '../theme';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
 const SEV_COLOR = {
   NIL:      C.green,
   LIGHT:    C.gold,
@@ -295,39 +293,30 @@ export default function SimulationScreen({ route, navigation }) {
           </Text>
         </View>
       </View>
-{/* Fuel Burn Graph */}
+{/* Fuel Burn Graph — custom bars, no chart-kit dependency */}
       {waypoints && waypoints.length > 1 && (
         <View style={s.card}>
           <Text style={s.cardTitle}>📈  FUEL BURN OVER ROUTE</Text>
-          <LineChart
-            data={{
-              labels: waypoints.map(wp => wp.name),
-              datasets: [{
-                data: waypoints.map((_, i) => {
-                  const burnPerLeg = report.fuel.burnKg / (waypoints.length - 1);
-                  return Math.max(0, report.fuel.onBoardKg - (burnPerLeg * i));
-                }),
-              }],
-            }}
-            width={Dimensions.get('window').width - 64}
-            height={180}
-            chartConfig={{
-              backgroundColor: '#111827',
-              backgroundGradientFrom: '#111827',
-              backgroundGradientTo: '#111827',
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(0, 212, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(100, 120, 140, ${opacity})`,
-              propsForDots: {
-                r: '4',
-                strokeWidth: '2',
-                stroke: '#00D4FF',
-              },
-            }}
-            bezier
-            style={{ borderRadius: 10, marginTop: 8 }}
-          />
-          <Text style={s.graphSub}>Estimated fuel remaining (kg) per waypoint</Text>
+          <View style={s.fuelChart}>
+            {waypoints.map((wp, i) => {
+              const burnPerLeg = report.fuel.burnKg / (waypoints.length - 1);
+              const remaining  = Math.max(0, report.fuel.onBoardKg - burnPerLeg * i);
+              const pct        = Math.min((remaining / report.fuel.onBoardKg) * 100, 100);
+              return (
+                <View key={i} style={s.fuelChartCol}>
+                  <Text style={s.fuelChartVal}>{Math.round(remaining / 1000)}t</Text>
+                  <View style={s.fuelChartBarWrap}>
+                    <View style={[s.fuelChartBar, {
+                      height: `${pct}%`,
+                      backgroundColor: pct > 50 ? C.green : pct > 25 ? C.gold : C.red,
+                    }]} />
+                  </View>
+                  <Text style={s.fuelChartLbl} numberOfLines={1}>{wp.name}</Text>
+                </View>
+              );
+            })}
+          </View>
+          <Text style={s.graphSub}>Estimated fuel remaining per waypoint</Text>
         </View>
       )}
       {/* Turbulence */}
@@ -599,6 +588,14 @@ const s = StyleSheet.create({
   altReason:  { color: C.textDim, fontSize:10, marginTop:2 },
   altDist:    { color: C.gold, fontWeight:'700', fontSize:13 },
   graphSub: { color: C.textDim, fontSize:10, textAlign:'center', marginTop:6 },
+  fuelChart:       { flexDirection:'row', alignItems:'flex-end', height:120,
+                     gap:6, marginTop:8, marginBottom:4 },
+  fuelChartCol:    { flex:1, alignItems:'center', height:'100%' },
+  fuelChartVal:    { color: C.textMuted, fontSize:8, marginBottom:3 },
+  fuelChartBarWrap:{ flex:1, width:'100%', justifyContent:'flex-end',
+                     backgroundColor:'rgba(255,255,255,0.06)', borderRadius:4 },
+  fuelChartBar:    { width:'100%', borderRadius:4, minHeight:4 },
+  fuelChartLbl:    { color: C.textDim, fontSize:8, marginTop:4, textAlign:'center' },
   // Fuel Optimization
   foptBanner:      { flexDirection:'row', backgroundColor:'#0D1526',
                      borderRadius:10, padding:12, marginBottom:12,
