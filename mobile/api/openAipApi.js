@@ -58,10 +58,11 @@ export const fetchAirportByIcao = async (icao) => {
       latitude:     airport.geometry?.coordinates?.[1] ?? null,
       longitude:    airport.geometry?.coordinates?.[0] ?? null,
       runways,
-      // Best runway = longest
-      longestRunwayFt: runways.length > 0
-        ? Math.max(...runways.map(r => r.lengthFt ?? 0))
-        : null,
+      // Best runway = longest (null if no length data available)
+      longestRunwayFt: (() => {
+        const lengths = runways.map(r => r.lengthFt).filter(l => l != null);
+        return lengths.length > 0 ? Math.max(...lengths) : null;
+      })(),
     };
   } catch (err) {
     console.warn(`[OpenAIP] fetch failed for ${icao}:`, err.message);

@@ -306,8 +306,8 @@ export default function EtopsScreen() {
             <View style={s.dataRow}>
               <Text style={s.dataLbl}>Position</Text>
               <Text style={s.dataVal}>
-                {result.criticalPoint.lat.toFixed(2)}°N {' '}
-                {result.criticalPoint.lon.toFixed(2)}°E
+                {Math.abs(result.criticalPoint.lat).toFixed(2)}°{result.criticalPoint.lat >= 0 ? 'N' : 'S'}{' '}
+                {Math.abs(result.criticalPoint.lon).toFixed(2)}°{result.criticalPoint.lon >= 0 ? 'E' : 'W'}
               </Text>
             </View>
             <View style={s.dataRow}>
