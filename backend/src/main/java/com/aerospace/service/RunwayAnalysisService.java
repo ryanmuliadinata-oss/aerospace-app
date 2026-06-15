@@ -1,6 +1,6 @@
 package com.aerospace.service;
 
-import com.aerospace.model.WeatherReport;
+import com.aerospace.controller.RunwayRequest.WeatherInput;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ public class RunwayAnalysisService {
     );
 
     public RunwayResult analyze(String aircraftType,
-                                 WeatherReport weather,
+                                 WeatherInput weather,
                                  double fuelKg,
                                  double payloadKg) {
 
