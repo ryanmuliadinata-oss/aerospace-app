@@ -119,11 +119,10 @@ public class SimulationController {
                 origin.toUpperCase(), destination.toUpperCase(),
                 waypoints, altitude));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                .body("{\"error\":\"" + e.getMessage() + "\"}");
+            return jsonError(e.getMessage());
         }
     }
- 
+
     @PostMapping("/runway")
     public ResponseEntity<?> runway(@RequestBody RunwayRequest req) {
         if (req.aircraftType == null || req.weather == null)
@@ -134,38 +133,51 @@ public class SimulationController {
                 req.aircraftType, req.weather,
                 req.fuelKg, req.payloadKg));
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                .body("{\"error\":\"" + e.getMessage() + "\"}");
+            return jsonError(e.getMessage());
         }
     }
- 
+
     // ── ETOPS compliance check ────────────────────────────────────────────────
- 
+
     public static class EtopsRequest {
         public List<Waypoint> waypoints;
         public String         aircraftType  = "B737";
         public int            etopsRating   = 180;
         public List<String>   excludeIcaos  = List.of();
     }
- 
+
     @PostMapping("/etops")
     public ResponseEntity<?> etops(@RequestBody EtopsRequest req) {
         if (req.waypoints == null || req.waypoints.size() < 2)
             return ResponseEntity.badRequest()
                 .body("{\"error\":\"At least 2 waypoints required\"}");
- 
+
         if (req.etopsRating < 60 || req.etopsRating > 240)
             return ResponseEntity.badRequest()
                 .body("{\"error\":\"ETOPS rating must be between 60 and 240 minutes\"}");
- 
+
+        for (Waypoint wp : req.waypoints) {
+            if (wp.latitude < -90 || wp.latitude > 90 ||
+                wp.longitude < -180 || wp.longitude > 180)
+                return ResponseEntity.badRequest()
+                    .body("{\"error\":\"Invalid waypoint coordinates\"}");
+        }
+
         try {
             EtopsResult result = etopsService.check(
                 req.waypoints, req.aircraftType,
                 req.etopsRating, req.excludeIcaos);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                .body("{\"error\":\"" + e.getMessage() + "\"}");
+            return jsonError(e.getMessage());
         }
+    }
+
+    // Safely embeds msg in a JSON string — escapes backslashes and quotes.
+    private static ResponseEntity<String> jsonError(String msg) {
+        String safe = msg == null ? "Unknown error"
+            : msg.replace("\\", "\\\\").replace("\"", "\\\"");
+        return ResponseEntity.badRequest()
+            .body("{\"error\":\"" + safe + "\"}");
     }
 }
