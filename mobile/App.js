@@ -35,14 +35,14 @@ const ICONS = {
 };
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_600SemiBold,
     Inter_700Bold,
     Inter_800ExtraBold,
   });
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return <View style={{ flex: 1, backgroundColor: '#111318' }} />;
   }
 
