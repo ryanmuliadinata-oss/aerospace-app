@@ -12,7 +12,9 @@ import java.net.http.HttpResponse;
 public class SunriseSunsetClient {
 
     private static final String BASE = "https://api.sunrise-sunset.org/json";
-    private final HttpClient http = HttpClient.newHttpClient();
+    private final HttpClient http;
+
+    public SunriseSunsetClient(HttpClient http) { this.http = http; }
 
     public SunriseSunsetResult fetch(double lat, double lon) {
         try {

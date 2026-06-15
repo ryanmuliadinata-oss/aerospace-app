@@ -25,7 +25,9 @@ public class OpenMeteoClient {
         {700, 10000}
     };
 
-    private final HttpClient http = HttpClient.newHttpClient();
+    private final HttpClient http;
+
+    public OpenMeteoClient(HttpClient http) { this.http = http; }
 
     public List<WindLayer> fetchWindLayers(double lat, double lon)
             throws Exception {

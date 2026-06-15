@@ -1,6 +1,7 @@
 package com.aerospace.service;
 
 import com.aerospace.model.Waypoint;
+import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -71,8 +72,8 @@ public class GreatCircleService {
             destination, dest[0], dest[1],
             numWaypoints, altitudeFt);
 
-        double distanceNm = haversineNm(orig[0], orig[1], dest[0], dest[1]);
-        double initialBearing = initialBearing(orig[0], orig[1], dest[0], dest[1]);
+        double distanceNm    = GeoMath.haversineNm(orig[0], orig[1], dest[0], dest[1]);
+        double initialBearing = GeoMath.initialBearingDeg(orig[0], orig[1], dest[0], dest[1]);
 
         return new GreatCircleResult(origin, destination,
             distanceNm, initialBearing, waypoints);
@@ -84,63 +85,14 @@ public class GreatCircleService {
             int numPoints, double altitudeFt) {
 
         List<Waypoint> points = new ArrayList<>();
-        double lat1r = Math.toRadians(lat1);
-        double lon1r = Math.toRadians(lon1);
-        double lat2r = Math.toRadians(lat2);
-        double lon2r = Math.toRadians(lon2);
-        double d = 2 * Math.asin(Math.sqrt(
-            Math.pow(Math.sin((lat2r - lat1r) / 2), 2)
-            + Math.cos(lat1r) * Math.cos(lat2r)
-            * Math.pow(Math.sin((lon2r - lon1r) / 2), 2)));
-
-        for (int i = 0; i <= numPoints + 1; i++) {
+        points.add(new Waypoint(originName, lat1, lon1, 0));
+        for (int i = 1; i <= numPoints; i++) {
             double f = (double) i / (numPoints + 1);
-            if (i == 0) {
-                points.add(new Waypoint(originName, lat1, lon1, 0));
-                continue;
-            }
-            if (i == numPoints + 1) {
-                points.add(new Waypoint(destName, lat2, lon2, 0));
-                continue;
-            }
-
-            double A = Math.sin((1 - f) * d) / Math.sin(d);
-            double B = Math.sin(f * d) / Math.sin(d);
-            double x = A * Math.cos(lat1r) * Math.cos(lon1r)
-                     + B * Math.cos(lat2r) * Math.cos(lon2r);
-            double y = A * Math.cos(lat1r) * Math.sin(lon1r)
-                     + B * Math.cos(lat2r) * Math.sin(lon2r);
-            double z = A * Math.sin(lat1r) + B * Math.sin(lat2r);
-            double lat = Math.toDegrees(Math.atan2(z, Math.sqrt(x*x + y*y)));
-            double lon = Math.toDegrees(Math.atan2(y, x));
-
-            String name = "WP" + String.format("%02d", i);
-            points.add(new Waypoint(name, lat, lon, altitudeFt));
+            double[] pt = GeoMath.interpolatePt(lat1, lon1, lat2, lon2, f);
+            points.add(new Waypoint("WP" + String.format("%02d", i), pt[0], pt[1], altitudeFt));
         }
+        points.add(new Waypoint(destName, lat2, lon2, 0));
         return points;
-    }
-
-    private double haversineNm(double lat1, double lon1,
-                                double lat2, double lon2) {
-        final double R = 3440.065;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2)
-                 + Math.cos(Math.toRadians(lat1))
-                 * Math.cos(Math.toRadians(lat2))
-                 * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return 2 * R * Math.asin(Math.sqrt(a));
-    }
-
-    private double initialBearing(double lat1, double lon1,
-                                   double lat2, double lon2) {
-        double lat1r = Math.toRadians(lat1);
-        double lat2r = Math.toRadians(lat2);
-        double dLon  = Math.toRadians(lon2 - lon1);
-        double x = Math.sin(dLon) * Math.cos(lat2r);
-        double y = Math.cos(lat1r) * Math.sin(lat2r)
-                 - Math.sin(lat1r) * Math.cos(lat2r) * Math.cos(dLon);
-        return (Math.toDegrees(Math.atan2(x, y)) + 360) % 360;
     }
 
     public record GreatCircleResult(

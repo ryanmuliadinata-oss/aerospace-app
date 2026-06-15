@@ -1,8 +1,9 @@
 package com.aerospace.service;
  
 import com.aerospace.model.Waypoint;
+import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
- 
+
 import java.util.*;
  
 /**
@@ -76,9 +77,6 @@ public class EtopsService {
  
     // Number of sample points along the route
     private static final int SAMPLES = 30;
- 
-    // Earth radius in NM
-    private static final double R_NM = 3440.065;
  
     // ── main entry point ─────────────────────────────────────────────────────
  
@@ -171,7 +169,7 @@ public class EtopsService {
         double totalDist = 0;
         double[] legDists = new double[waypoints.size() - 1];
         for (int i = 0; i < waypoints.size() - 1; i++) {
-            legDists[i] = haversineNm(waypoints.get(i), waypoints.get(i + 1));
+            legDists[i] = GeoMath.haversineNm(waypoints.get(i), waypoints.get(i + 1));
             totalDist += legDists[i];
         }
         result.add(waypoints.get(0));
@@ -180,7 +178,7 @@ public class EtopsService {
             Waypoint a = waypoints.get(i), b = waypoints.get(i + 1);
             for (int j = 1; j <= legSamples; j++) {
                 double f = (double) j / (legSamples + 1);
-                double[] pt = interpolatePt(a.latitude, a.longitude,
+                double[] pt = GeoMath.interpolatePt(a.latitude, a.longitude,
                     b.latitude, b.longitude, f);
                 result.add(new Waypoint(String.format("S%02d", result.size()),
                     pt[0], pt[1], a.altitudeFt));
@@ -195,31 +193,11 @@ public class EtopsService {
         pts.add(a);
         for (int i = 1; i < n - 1; i++) {
             double f = (double) i / (n - 1);
-            double[] pt = interpolatePt(a.latitude, a.longitude, b.latitude, b.longitude, f);
+            double[] pt = GeoMath.interpolatePt(a.latitude, a.longitude, b.latitude, b.longitude, f);
             pts.add(new Waypoint("S" + i, pt[0], pt[1], a.altitudeFt));
         }
         pts.add(b);
         return pts;
-    }
- 
-    private double[] interpolatePt(double lat1, double lon1,
-                                    double lat2, double lon2, double f) {
-        double lat1r = Math.toRadians(lat1), lon1r = Math.toRadians(lon1);
-        double lat2r = Math.toRadians(lat2), lon2r = Math.toRadians(lon2);
-        double d = 2 * Math.asin(Math.sqrt(
-            Math.pow(Math.sin((lat2r - lat1r) / 2), 2)
-            + Math.cos(lat1r) * Math.cos(lat2r)
-            * Math.pow(Math.sin((lon2r - lon1r) / 2), 2)));
-        if (d < 1e-10) return new double[]{ lat1, lon1 };
-        double A = Math.sin((1 - f) * d) / Math.sin(d);
-        double B = Math.sin(f * d) / Math.sin(d);
-        double x = A * Math.cos(lat1r) * Math.cos(lon1r) + B * Math.cos(lat2r) * Math.cos(lon2r);
-        double y = A * Math.cos(lat1r) * Math.sin(lon1r) + B * Math.cos(lat2r) * Math.sin(lon2r);
-        double z = A * Math.sin(lat1r) + B * Math.sin(lat2r);
-        return new double[]{
-            Math.toDegrees(Math.atan2(z, Math.sqrt(x * x + y * y))),
-            Math.toDegrees(Math.atan2(y, x))
-        };
     }
  
     private NearestAlternate nearestAlternate(double lat, double lon,
@@ -228,25 +206,12 @@ public class EtopsService {
         for (Map.Entry<String, EtopsAlternate> entry : ALTERNATES.entrySet()) {
             if (excludeIcaos != null && excludeIcaos.contains(entry.getKey())) continue;
             EtopsAlternate alt = entry.getValue();
-            double dist = haversineNm(lat, lon, alt.lat(), alt.lon());
+            double dist = GeoMath.haversineNm(lat, lon, alt.lat(), alt.lon());
             if (best == null || dist < best.distanceNm) {
                 best = new NearestAlternate(entry.getKey(), alt, dist);
             }
         }
         return best;
-    }
- 
-    private double haversineNm(Waypoint a, Waypoint b) {
-        return haversineNm(a.latitude, a.longitude, b.latitude, b.longitude);
-    }
- 
-    private double haversineNm(double lat1, double lon1, double lat2, double lon2) {
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                 * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return 2 * R_NM * Math.asin(Math.sqrt(a));
     }
  
     private String buildAssessment(boolean compliant, double worstMin,

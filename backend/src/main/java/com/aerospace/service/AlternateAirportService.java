@@ -1,6 +1,7 @@
 package com.aerospace.service;
 
 import com.aerospace.model.Waypoint;
+import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,8 +64,8 @@ public class AlternateAirportService {
                     .findFirst()
                     .ifPresent(a -> suggestions.add(new AlternateSuggestion(
                         a.icao, a.name, "Pre-defined alternate",
-                        haversineNm(destWaypoint.latitude, destWaypoint.longitude,
-                                    a.lat, a.lon))));
+                        GeoMath.haversineNm(destWaypoint.latitude, destWaypoint.longitude,
+                                        a.lat, a.lon))));
             }
         }
 
@@ -75,8 +76,8 @@ public class AlternateAirportService {
                 .noneMatch(s -> s.icao.equals(a.icao)))
             .map(a -> new AlternateSuggestion(
                 a.icao, a.name, "Nearest alternate",
-                haversineNm(destWaypoint.latitude, destWaypoint.longitude,
-                            a.lat, a.lon)))
+                GeoMath.haversineNm(destWaypoint.latitude, destWaypoint.longitude,
+                                    a.lat, a.lon)))
             .filter(s -> s.distanceNm < 300)
             .sorted((a, b) -> Double.compare(a.distanceNm, b.distanceNm))
             .limit(3)
@@ -86,18 +87,6 @@ public class AlternateAirportService {
             .sorted((a, b) -> Double.compare(a.distanceNm, b.distanceNm))
             .limit(5)
             .toList();
-    }
-
-    private double haversineNm(double lat1, double lon1,
-                                double lat2, double lon2) {
-        final double R = 3440.065;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2)
-                 + Math.cos(Math.toRadians(lat1))
-                 * Math.cos(Math.toRadians(lat2))
-                 * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return 2 * R * Math.asin(Math.sqrt(a));
     }
 
     public record AirportInfo(String icao, String name, double lat, double lon) {}

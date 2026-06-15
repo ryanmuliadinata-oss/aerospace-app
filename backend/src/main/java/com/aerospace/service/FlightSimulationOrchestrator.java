@@ -3,6 +3,7 @@ package com.aerospace.service;
 import com.aerospace.client.*;
 import com.aerospace.model.*;
 import com.aerospace.service.FuelOptimizationService.FuelOptimizationResult;
+import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
  
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class FlightSimulationOrchestrator {
         }
  
         double flightTimeHrs = plan.cruiseSpeedKts > 0
-            ? estimateDistanceNm(plan.waypoints) / plan.cruiseSpeedKts
+            ? GeoMath.routeDistanceNm(plan.waypoints) / plan.cruiseSpeedKts
             : 0;
  
         String recommendedAlt = optimizeFlightLevel(windLayers, plan);
@@ -152,25 +153,4 @@ public class FlightSimulationOrchestrator {
             .orElse("Optimal based on winds aloft data");
     }
  
-    private double estimateDistanceNm(List<Waypoint> waypoints) {
-        if (waypoints == null || waypoints.size() < 2) return 0;
-        double total = 0;
-        for (int i = 0; i < waypoints.size() - 1; i++) {
-            total += haversineNm(waypoints.get(i), waypoints.get(i + 1));
-        }
-        return total;
-    }
- 
-    private double haversineNm(Waypoint a, Waypoint b) {
-        final double R = 3440.065;
-        double dLat = Math.toRadians(b.latitude  - a.latitude);
-        double dLon = Math.toRadians(b.longitude - a.longitude);
-        double sinDLat = Math.sin(dLat / 2);
-        double sinDLon = Math.sin(dLon / 2);
-        double h = sinDLat * sinDLat
-            + Math.cos(Math.toRadians(a.latitude))
-            * Math.cos(Math.toRadians(b.latitude))
-            * sinDLon * sinDLon;
-        return 2 * R * Math.asin(Math.sqrt(h));
-    }
 }

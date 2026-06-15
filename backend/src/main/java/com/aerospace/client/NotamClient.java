@@ -17,7 +17,9 @@ public class NotamClient {
     private static final String BASE =
         "https://external-api.faa.gov/notamapi/v1/notams";
 
-    private final HttpClient http = HttpClient.newHttpClient();
+    private final HttpClient http;
+
+    public NotamClient(HttpClient http) { this.http = http; }
 
     public List<NotamItem> fetchNotams(String icaoCode) {
         try {

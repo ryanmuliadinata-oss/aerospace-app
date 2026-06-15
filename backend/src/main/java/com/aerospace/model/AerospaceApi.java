@@ -12,14 +12,6 @@ public enum AerospaceApi {
     OPEN_METEO(
         "https://api.open-meteo.com/v1",
         ""
-    ),
-    NASA_EARTHDATA(
-        "https://appeears.earthdatacloud.nasa.gov/api",
-        "Bearer"
-    ),
-    OPENSKY_NETWORK(
-        "https://opensky-network.org/api",
-        "Basic"
     );
 
     public final String baseUrl;

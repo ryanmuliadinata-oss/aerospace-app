@@ -19,9 +19,12 @@ public class FlightAwareClient {
     private static final double GAL_TO_KG = 2.85;
 
     private final ApiKeyStore store;
-    private final HttpClient  http = HttpClient.newHttpClient();
+    private final HttpClient  http;
 
-    public FlightAwareClient(ApiKeyStore store) { this.store = store; }
+    public FlightAwareClient(ApiKeyStore store, HttpClient http) {
+        this.store = store;
+        this.http  = http;
+    }
 
     public FuelReport fetchFuelEstimate(String userId, FlightPlan plan)
             throws Exception {

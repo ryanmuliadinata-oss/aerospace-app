@@ -1,9 +1,7 @@
 package com.aerospace.client;
 
-import com.aerospace.model.AerospaceApi;
 import com.aerospace.model.Waypoint;
 import com.aerospace.model.WeatherReport;
-import com.aerospace.store.ApiKeyStore;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -18,10 +16,9 @@ public class AviationWeatherClient {
 
     private static final String BASE = "https://aviationweather.gov";
 
-    private final ApiKeyStore store;
-    private final HttpClient  http = HttpClient.newHttpClient();
+    private final HttpClient http;
 
-    public AviationWeatherClient(ApiKeyStore store) { this.store = store; }
+    public AviationWeatherClient(HttpClient http) { this.http = http; }
 
     public WeatherReport fetchMetar(String userId, Waypoint waypoint)
             throws Exception {

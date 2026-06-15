@@ -3,8 +3,9 @@ package com.aerospace.service;
 import com.aerospace.model.FlightPlan;
 import com.aerospace.model.WindLayer;
 import com.aerospace.model.Waypoint;
+import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
- 
+
 import java.util.*;
  
 /**
@@ -41,8 +42,14 @@ public class FuelOptimizationService {
  
     public FuelOptimizationResult optimize(FlightPlan plan, List<WindLayer> windLayers) {
  
-        double distanceNm   = estimateDistanceNm(plan.waypoints);
-        double routeBearing = estimateBearing(plan.waypoints);
+        double distanceNm = GeoMath.routeDistanceNm(plan.waypoints);
+        if (distanceNm == 0) distanceNm = 1000;
+        Waypoint wpFirst = plan.waypoints.get(0);
+        Waypoint wpLast  = plan.waypoints.get(plan.waypoints.size() - 1);
+        double routeBearing = plan.waypoints.size() >= 2
+            ? GeoMath.initialBearingDeg(wpFirst.latitude, wpFirst.longitude,
+                                         wpLast.latitude,  wpLast.longitude)
+            : 90;
         double[] aircraftData = AIRCRAFT_DATA.getOrDefault(
             plan.aircraftType, new double[]{ 2_400, 350, 390 });
  
@@ -167,28 +174,6 @@ public class FuelOptimizationService {
             .orElse(null);
     }
  
-    private double estimateDistanceNm(List<Waypoint> waypoints) {
-        if (waypoints == null || waypoints.size() < 2) return 1000;
-        double total = 0;
-        for (int i = 0; i < waypoints.size() - 1; i++) {
-            total += haversineNm(waypoints.get(i), waypoints.get(i + 1));
-        }
-        return total;
-    }
- 
-    private double estimateBearing(List<Waypoint> waypoints) {
-        if (waypoints == null || waypoints.size() < 2) return 90;
-        Waypoint a = waypoints.get(0);
-        Waypoint b = waypoints.get(waypoints.size() - 1);
-        double dLon = Math.toRadians(b.longitude - a.longitude);
-        double lat1 = Math.toRadians(a.latitude);
-        double lat2 = Math.toRadians(b.latitude);
-        double x = Math.sin(dLon) * Math.cos(lat2);
-        double y = Math.cos(lat1) * Math.sin(lat2)
-                 - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-        return (Math.toDegrees(Math.atan2(x, y)) + 360) % 360;
-    }
- 
     private int nearestCandidateFL(List<Waypoint> waypoints) {
         // Use filed altitude from first waypoint as baseline, snap to candidate
         if (waypoints == null || waypoints.isEmpty()) return 350;
@@ -202,17 +187,6 @@ public class FuelOptimizationService {
             if (Math.abs(fl - filedFL) < Math.abs(nearest - filedFL)) nearest = fl;
         }
         return nearest;
-    }
- 
-    private double haversineNm(Waypoint a, Waypoint b) {
-        final double R = 3440.065;
-        double dLat = Math.toRadians(b.latitude  - a.latitude);
-        double dLon = Math.toRadians(b.longitude - a.longitude);
-        double h = Math.sin(dLat/2) * Math.sin(dLat/2)
-                 + Math.cos(Math.toRadians(a.latitude))
-                 * Math.cos(Math.toRadians(b.latitude))
-                 * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return 2 * R * Math.asin(Math.sqrt(h));
     }
  
     private String buildRecommendation(FlightLevelOption best,

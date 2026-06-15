@@ -1,9 +1,7 @@
 package com.aerospace.client;
 
-import com.aerospace.model.AerospaceApi;
 import com.aerospace.model.TurbulenceReport;
 import com.aerospace.model.Waypoint;
-import com.aerospace.store.ApiKeyStore;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -20,10 +18,9 @@ public class TurbulenceClient {
 
     private static final String BASE = "https://aviationweather.gov";
 
-    private final HttpClient http = HttpClient.newHttpClient();
+    private final HttpClient http;
 
-    // ApiKeyStore kept for consistency but AviationWeather needs no key
-    public TurbulenceClient(ApiKeyStore store) {}
+    public TurbulenceClient(HttpClient http) { this.http = http; }
 
     public List<TurbulenceReport> fetchTurbulence(
             String userId, List<Waypoint> waypoints) throws Exception {
