@@ -5,20 +5,20 @@ import MapView, { Marker, Polyline, Circle } from 'react-native-maps';
 import { fetchLiveAircraft, bboxFromWaypoints } from '../api/openSkyApi';
  
 const SEV_COLOR = {
-  NIL:      '#00FF88',
-  LIGHT:    '#FFD700',
-  MODERATE: '#FF8C00',
-  SEVERE:   '#FF3333',
-  EXTREME:  '#CC0000',
-  UNKNOWN:  '#556677',
+  NIL:      '#50DC8C',
+  LIGHT:    '#F0C060',
+  MODERATE: '#E07830',
+  SEVERE:   '#E05252',
+  EXTREME:  '#B03030',
+  UNKNOWN:  '#4A5568',
 };
- 
+
 const WX_COLOR = {
-  VFR:  '#00FF88',
-  MVFR: '#6699FF',
-  IFR:  '#FF3333',
-  LIFR: '#FF00FF',
-  UNKN: '#556677',
+  VFR:  '#50DC8C',
+  MVFR: '#F0C060',
+  IFR:  '#E05252',
+  LIFR: '#B03030',
+  UNKN: '#4A5568',
 };
  
 // Convert heading degrees to a rotated plane emoji direction label
@@ -91,7 +91,7 @@ export default function MapScreen({ route }) {
         {/* Flight route line */}
         <Polyline
           coordinates={coords}
-          strokeColor="#00D4FF"
+          strokeColor="#50DC8C"
           strokeWidth={2}
         />
  
@@ -204,7 +204,7 @@ export default function MapScreen({ route }) {
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Text style={s.legendText}>✈ Traffic</Text>
-            {trafficLoading && <ActivityIndicator size="small" color="#00D4FF" />}
+            {trafficLoading && <ActivityIndicator size="small" color="#50DC8C" />}
             {!trafficLoading && (
               <Text style={s.acCount}>{liveAircraft.length}</Text>
             )}
@@ -234,40 +234,40 @@ const s = StyleSheet.create({
                     height: Dimensions.get('window').height },
   empty:          { flex: 1, backgroundColor: C.bgBase,
                     justifyContent: 'center', alignItems: 'center' },
-  emptyText:      { color: C.cyan, fontSize: 16, textAlign: 'center' },
+  emptyText:      { color: C.green, fontSize: 16, textAlign: 'center' },
   legend:         { position: 'absolute', top: 50, right: 12,
-                    backgroundColor: '#0A0E1Aee', borderRadius: 14,
+                    backgroundColor: '#0A0E1Aee', borderRadius: 12,
                     padding: 10, borderWidth: 1, borderColor: C.border },
-  legendTitle:    { color: C.cyan, fontSize: 9, fontWeight: '700',
+  legendTitle:    { color: C.textMuted, fontSize: 9, fontWeight: '700',
                     letterSpacing: 2, marginBottom: 8 },
   legendBtn:      { paddingVertical: 6, paddingHorizontal: 10,
                     borderRadius: 6, marginBottom: 4,
-                    backgroundColor: '#1F2937' },
-  legendBtnActive:{ backgroundColor: '#00D4FF22',
-                    borderWidth: 1, borderColor: '#00D4FF55' },
+                    backgroundColor: C.bgCardAlt },
+  legendBtnActive:{ backgroundColor: C.greenFaint,
+                    borderWidth: 1, borderColor: C.greenDim },
   legendText:     { color: C.textPrimary, fontSize: 12 },
   wxLegend:       { position: 'absolute', bottom: 40, left: 12,
-                    backgroundColor: '#0A0E1Aee', borderRadius: 14,
+                    backgroundColor: '#0A0E1Aee', borderRadius: 12,
                     padding: 10, borderWidth: 1, borderColor: C.border },
   wxRow:          { flexDirection: 'row', alignItems: 'center',
                     marginBottom: 4 },
   wxDot:          { width: 10, height: 10, borderRadius: 5, marginRight: 6 },
   wxLabel:        { color: C.textPrimary, fontSize: 11 },
   // Live aircraft
-  acMarker:       { backgroundColor: '#000919cc', borderRadius: 16,
-                    padding: 4, borderWidth: 1, borderColor: '#00D4FF88' },
-  acEmoji:        { fontSize: 16, color: C.cyan },
-  acCount:        { color: C.cyan, fontSize: 9, fontWeight: '800',
-                    backgroundColor: '#00D4FF22', borderRadius: 4,
+  acMarker:       { backgroundColor: '#0B0D11cc', borderRadius: 12,
+                    padding: 4, borderWidth: 1, borderColor: C.greenDim },
+  acEmoji:        { fontSize: 16, color: C.green },
+  acCount:        { color: C.green, fontSize: 9, fontWeight: '800',
+                    backgroundColor: C.greenFaint, borderRadius: 4,
                     paddingHorizontal: 4, paddingVertical: 1 },
   refreshBtn:     { marginTop: 6, paddingVertical: 4, alignItems: 'center',
                     borderTopWidth: 1, borderTopColor: C.border },
   refreshText:    { color: C.textDim, fontSize: 10, fontWeight: '600' },
   acCallout:      { position: 'absolute', bottom: 40, right: 12,
-                    backgroundColor: '#0A0E1Aee', borderRadius: 16,
-                    padding: 14, borderWidth: 1, borderColor: '#00D4FF55',
+                    backgroundColor: '#0A0E1Aee', borderRadius: 12,
+                    padding: 14, borderWidth: 1, borderColor: C.greenDim,
                     minWidth: 170 },
-  acCalloutTitle: { color: C.cyan, fontWeight: '800', fontSize: 14,
+  acCalloutTitle: { color: C.green, fontWeight: '800', fontSize: 14,
                     marginBottom: 10, letterSpacing: 1 },
   acCalloutRow:   { color: C.textDim, fontSize: 11, marginBottom: 5,
                     fontFamily: 'monospace' },

@@ -162,7 +162,7 @@ function CgEnvelope({ aircraft, dots }) {
             fontSize="8" textAnchor="middle">{v}%</SvgText>
         </React.Fragment>
       ))}
-      <Path d={pathD} fill="#00FF8812" stroke="#00FF8866" strokeWidth="1.5" />
+      <Path d={pathD} fill="#50DC8C12" stroke="#50DC8C55" strokeWidth="1.5" />
       {validDots.length >= 2 && (
         <Polyline
           points={validDots.map(dot =>
@@ -342,12 +342,12 @@ export default function WeightBalanceScreen() {
         <View style={s.barTrack}>
           <View style={[s.barFill, {
             width: `${Math.min((value/max)*100,100)}%`,
-            backgroundColor: ok ? '#00FF88' : '#FF3333'
+            backgroundColor: ok ? '#50DC8C' : '#E05252'
           }]} />
         </View>
       </View>
       <View style={s.statusRight}>
-        <Text style={[s.statusValue, { color: ok ? '#00FF88' : '#FF3333' }]}>
+        <Text style={[s.statusValue, { color: ok ? '#50DC8C' : '#E05252' }]}>
           {Math.round(value).toLocaleString()} {unit}
         </Text>
         <Text style={s.statusMax}>/ {Math.round(max).toLocaleString()}</Text>
@@ -418,20 +418,20 @@ export default function WeightBalanceScreen() {
         <View style={s.card}>
           <Text style={s.cardTitle}>📐  CG ENVELOPE</Text>
           <CgEnvelope aircraft={aircraft} dots={[
-            { mac: result.zfCg, ton: result.zfw / 1000, color: C.cyan, label: 'ZFW' },
+            { mac: result.zfCg, ton: result.zfw / 1000, color: C.textSecondary, label: 'ZFW' },
             { mac: result.toCg, ton: result.tow / 1000, color: C.green, label: 'TOW' },
             { mac: result.ldCg, ton: result.ldw / 1000, color: C.gold, label: 'LDW' },
           ]} />
           <View style={s.cgLegend}>
             {[
-              { color: C.cyan, label: `ZFW  ${result.zfCg.toFixed(1)}% MAC`, ok: result.checks.cgZeroFuel },
+              { color: C.textSecondary, label: `ZFW  ${result.zfCg.toFixed(1)}% MAC`, ok: result.checks.cgZeroFuel },
               { color: C.green, label: `TOW  ${result.toCg.toFixed(1)}% MAC`, ok: result.checks.cgTakeoff },
               { color: C.gold, label: `LDW  ${result.ldCg.toFixed(1)}% MAC`, ok: result.checks.cgLanding },
             ].map(({ color, label, ok }) => (
               <View key={label} style={s.cgLegendItem}>
                 <View style={[s.cgLegendDot, { backgroundColor: color }]} />
                 <Text style={s.cgLegendText}>{label}</Text>
-                <Text style={{ color: ok ? '#00FF88' : '#FF3333', fontSize: 10, marginLeft: 4 }}>
+                <Text style={{ color: ok ? '#50DC8C' : '#E05252', fontSize: 10, marginLeft: 4 }}>
                   {ok ? '✓' : '✗'}
                 </Text>
               </View>
@@ -456,10 +456,10 @@ export default function WeightBalanceScreen() {
             <View key={lbl} style={s.cgDetailRow}>
               <Text style={s.cgDetailLabel}>{lbl}</Text>
               <Text style={s.cgDetailArm}>{arm.toFixed(3)} m</Text>
-              <Text style={[s.cgDetailPct, { color: ok ? '#00FF88' : '#FF3333' }]}>
+              <Text style={[s.cgDetailPct, { color: ok ? '#50DC8C' : '#E05252' }]}>
                 {pct.toFixed(2)}% MAC
               </Text>
-              <Text style={{ color: ok ? '#00FF88' : '#FF3333', fontSize: 11, width: 16 }}>
+              <Text style={{ color: ok ? '#50DC8C' : '#E05252', fontSize: 11, width: 16 }}>
                 {ok ? '✓' : '✗'}
               </Text>
             </View>
@@ -476,10 +476,10 @@ export default function WeightBalanceScreen() {
               <Text style={s.breakValue}>{Math.round(z.kg).toLocaleString()} kg</Text>
             </View>
           ))}
-          <View style={[s.breakRow, { borderTopWidth: 1, borderTopColor: '#00D4FF33', marginTop: 4 }]}>
-            <Text style={[s.breakLabel, { color: C.cyan }]}>TOTAL PAX</Text>
+          <View style={[s.breakRow, { borderTopWidth: 1, borderTopColor: C.borderGreen, marginTop: 4 }]}>
+            <Text style={[s.breakLabel, { color: C.green }]}>TOTAL PAX</Text>
             <Text style={s.breakSub}>{result.totalPax} / {d.maxPax}</Text>
-            <Text style={[s.breakValue, { color: result.checks.paxCount ? '#00FF88' : '#FF3333' }]}>
+            <Text style={[s.breakValue, { color: result.checks.paxCount ? '#50DC8C' : '#E05252' }]}>
               {Math.round(result.paxKg).toLocaleString()} kg
             </Text>
           </View>
@@ -491,7 +491,7 @@ export default function WeightBalanceScreen() {
             <View key={i} style={s.breakRow}>
               <Text style={s.breakLabel}>{h.name}</Text>
               <Text style={s.breakSub}>Max {h.maxKg.toLocaleString()}</Text>
-              <Text style={[s.breakValue, { color: h.kg <= h.maxKg ? '#fff' : '#FF3333' }]}>
+              <Text style={[s.breakValue, { color: h.kg <= h.maxKg ? '#fff' : '#E05252' }]}>
                 {Math.round(h.kg).toLocaleString()} kg
               </Text>
             </View>
@@ -526,15 +526,15 @@ export default function WeightBalanceScreen() {
  
 const s = StyleSheet.create({
   container:    { flex: 1, backgroundColor: C.bgBase, padding: 16 },
-  sectionTitle: { color: C.cyan, fontSize: 11, fontWeight: '700',
+  sectionTitle: { color: C.textMuted, fontSize: 11, fontWeight: '700',
                   letterSpacing: 2.5, marginTop: 24, marginBottom: 12 },
   presetRow:    { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
   acBtn:        { backgroundColor: C.bgCard, borderRadius: 8,
                   paddingHorizontal: 14, paddingVertical: 9,
                   borderWidth: 1, borderColor: C.border },
-  acBtnActive:  { borderColor: '#00D4FF', backgroundColor: '#00D4FF18' },
+  acBtnActive:  { borderColor: C.greenDim, backgroundColor: C.greenFaint },
   acText:       { color: C.textMuted, fontSize: 12, fontWeight: '600' },
-  acTextActive: { color: C.cyan },
+  acTextActive: { color: C.green },
   zoneRow:      { flexDirection: 'row', alignItems: 'center', marginBottom: 10,
                   backgroundColor: C.bgCard, borderRadius: 14, padding: 12,
                   borderWidth: 1, borderColor: C.border },
@@ -548,27 +548,27 @@ const s = StyleSheet.create({
   label:        { color: C.textMuted, fontSize: 11, marginBottom: 6, letterSpacing: 1 },
   input:        { backgroundColor: C.bgCard, color: '#fff', borderRadius: 14,
                   padding: 13, fontSize: 15, borderWidth: 1, borderColor: C.border },
-  btn:          { backgroundColor: '#00D4FF', borderRadius: 16, padding: 16,
+  btn:          { backgroundColor: C.green, borderRadius: 12, padding: 16,
                   alignItems: 'center', marginTop: 8, marginBottom: 16 },
-  btnText:      { color: '#000919', fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
-  shareBtn:     { backgroundColor: '#FFD70022', borderRadius: 16, padding: 14,
+  btnText:      { color: C.greenDark, fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
+  shareBtn:     { backgroundColor: C.goldFaint, borderRadius: 12, padding: 14,
                   alignItems: 'center', marginBottom: 14,
-                  borderWidth: 1, borderColor: '#FFD70055' },
+                  borderWidth: 1, borderColor: C.goldDim },
   shareBtnText: { color: C.gold, fontWeight: '700', fontSize: 13, letterSpacing: 1 },
-  banner:       { borderRadius: 16, padding: 16, marginBottom: 16,
+  banner:       { borderRadius: 12, padding: 16, marginBottom: 16,
                   flexDirection: 'row', alignItems: 'center', gap: 12 },
-  bannerGo:     { backgroundColor: '#00FF8818', borderWidth: 1, borderColor: '#00FF88' },
-  bannerNogo:   { backgroundColor: '#FF333318', borderWidth: 1, borderColor: '#FF3333' },
+  bannerGo:     { backgroundColor: C.greenFaint, borderWidth: 1, borderColor: C.greenDim },
+  bannerNogo:   { backgroundColor: C.redFaint,   borderWidth: 1, borderColor: C.redDim },
   bannerIcon:   { fontSize: 22 },
   bannerText:   { color: '#fff', fontSize: 13, fontWeight: '700', flex: 1 },
-  card:         { backgroundColor: C.bgCard, borderRadius: 18, padding: 16,
+  card:         { backgroundColor: C.bgCard, borderRadius: 12, padding: 16,
                   marginBottom: 14, borderWidth: 1, borderColor: C.border },
-  cardTitle:    { color: C.cyan, fontSize: 11, fontWeight: '700',
+  cardTitle:    { color: C.textMuted, fontSize: 11, fontWeight: '700',
                   letterSpacing: 2.5, marginBottom: 14 },
   statusRow:    { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 12 },
   statusLeft:   { flex: 1 },
   statusLabel:  { color: C.textMuted, fontSize: 11, marginBottom: 6 },
-  barTrack:     { height: 8, backgroundColor: '#1F2937', borderRadius: 4, overflow: 'hidden' },
+  barTrack:     { height: 8, backgroundColor: C.border, borderRadius: 4, overflow: 'hidden' },
   barFill:      { height: '100%', borderRadius: 4 },
   statusRight:  { alignItems: 'flex-end', width: 100 },
   statusValue:  { fontWeight: '700', fontSize: 12 },

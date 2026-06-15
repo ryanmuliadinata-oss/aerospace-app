@@ -80,60 +80,60 @@ function CorridorMap({ routePoints, alternates }) {
   return (
     <Svg width={MAP_W} height={MAP_H} style={s.mapSvg}>
       {/* Background */}
-      <Rect x="0" y="0" width={MAP_W} height={MAP_H} fill="#0D1526" rx="8" />
- 
+      <Rect x="0" y="0" width={MAP_W} height={MAP_H} fill="#0B0D11" rx="8" />
+
       {/* Latitude grid lines */}
       {[-60, -30, 0, 30, 60].map(lat => {
         const y = projectLonLat(0, lat).y;
         return (
           <Line key={lat} x1="0" y1={y} x2={MAP_W} y2={y}
-            stroke="#1F2937" strokeWidth="0.5" />
+            stroke="#1E2028" strokeWidth="0.5" />
         );
       })}
       {[-120, -60, 0, 60, 120].map(lon => {
         const x = projectLonLat(lon, 0).x;
         return (
           <Line key={lon} x1={x} y1="0" x2={x} y2={MAP_H}
-            stroke="#1F2937" strokeWidth="0.5" />
+            stroke="#1E2028" strokeWidth="0.5" />
         );
       })}
- 
+
       {/* ETOPS diversion radius circles (approximate) */}
       {routePoints.filter((_, i) => i % 6 === 0).map((rp, i) => {
         const center = projectLonLat(rp.lon, rp.lat);
         const radiusDeg = (rp.diversionNm / 60) * 1.2; // rough visual
         const radiusPx  = (radiusDeg / 180) * MAP_H * 1.5;
-        const color = rp.compliant ? '#00FF8820' : '#FF333320';
-        const stroke = rp.compliant ? '#00FF8840' : '#FF333340';
+        const color = rp.compliant ? '#50DC8C14' : '#E0525214';
+        const stroke = rp.compliant ? '#50DC8C33' : '#E0525233';
         return (
           <Circle key={i} cx={center.x} cy={center.y}
             r={Math.min(radiusPx, 40)}
             fill={color} stroke={stroke} strokeWidth="0.5" />
         );
       })}
- 
+
       {/* Route polyline */}
       {routePts.length >= 2 && (
         <Polyline points={polyline}
-          fill="none" stroke="#00D4FF" strokeWidth="1.5"
+          fill="none" stroke="#50DC8C" strokeWidth="1.5"
           strokeDasharray="4,2" />
       )}
- 
+
       {/* Route sample dots */}
       {routePts.map((p, i) => (
         <Circle key={i} cx={p.x} cy={p.y} r="2"
-          fill={routePoints[i].compliant ? '#00FF88' : '#FF3333'} />
+          fill={routePoints[i].compliant ? '#50DC8C' : '#E05252'} />
       ))}
- 
+
       {/* Alternate airports */}
       {alternates && alternates.map((alt, i) => {
         const p = projectLonLat(alt.lon, alt.lat);
         return (
           <React.Fragment key={i}>
             <Circle cx={p.x} cy={p.y} r="4"
-              fill="#FFD70022" stroke="#FFD700" strokeWidth="1" />
+              fill="#F0C06022" stroke="#F0C060" strokeWidth="1" />
             <SvgText x={p.x + 5} y={p.y + 3}
-              fill="#FFD700" fontSize="6">{alt.icao}</SvgText>
+              fill="#F0C060" fontSize="6">{alt.icao}</SvgText>
           </React.Fragment>
         );
       })}
@@ -175,7 +175,7 @@ export default function EtopsScreen() {
     }
   };
  
-  const compliantColor = result?.compliant ? '#00FF88' : '#FF3333';
+  const compliantColor = result?.compliant ? '#50DC8C' : '#E05252';
  
   return (
     <ScrollView style={s.container}>
@@ -258,7 +258,7 @@ export default function EtopsScreen() {
               <Text style={s.metricLbl}>WORST DIVERSION</Text>
             </View>
             <View style={s.metric}>
-              <Text style={[s.metricVal, { color: C.cyan }]}>
+              <Text style={[s.metricVal, { color: C.green }]}>
                 ETOPS-{result.requiredRatingMinutes}
               </Text>
               <Text style={s.metricLbl}>REQUIRED RATING</Text>
@@ -284,15 +284,15 @@ export default function EtopsScreen() {
           />
           <View style={s.mapLegend}>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#00FF88' }]} />
+              <View style={[s.legendDot, { backgroundColor: '#50DC8C' }]} />
               <Text style={s.legendText}>Within limit</Text>
             </View>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#FF3333' }]} />
+              <View style={[s.legendDot, { backgroundColor: '#E05252' }]} />
               <Text style={s.legendText}>Exceeds limit</Text>
             </View>
             <View style={s.legendItem}>
-              <View style={[s.legendDot, { backgroundColor: '#FFD700',
+              <View style={[s.legendDot, { backgroundColor: '#F0C060',
                 borderRadius: 2, width: 10, height: 10 }]} />
               <Text style={s.legendText}>ETOPS alternate</Text>
             </View>
@@ -350,7 +350,7 @@ export default function EtopsScreen() {
                 {alt.runwayFt.toLocaleString()}
               </Text>
               <Text style={[s.td, { width: 32, textAlign: 'right',
-                color: alt.hasIls ? '#00FF88' : '#FF8C00' }]}>
+                color: alt.hasIls ? '#50DC8C' : '#F0C060' }]}>
                 {alt.hasIls ? '✓' : '—'}
               </Text>
             </View>
@@ -377,11 +377,11 @@ export default function EtopsScreen() {
                 {rp.nearestAlternateIcao}
               </Text>
               <Text style={[s.td, { width: 52, textAlign: 'right',
-                color: rp.compliant ? '#00FF88' : '#FF3333' }]}>
+                color: rp.compliant ? '#50DC8C' : '#E05252' }]}>
                 {Math.round(rp.diversionMinutes)}
               </Text>
               <Text style={[s.td, { width: 24, textAlign: 'right',
-                color: rp.compliant ? '#00FF88' : '#FF3333' }]}>
+                color: rp.compliant ? '#50DC8C' : '#E05252' }]}>
                 {rp.compliant ? '✓' : '✗'}
               </Text>
             </View>
@@ -394,45 +394,45 @@ export default function EtopsScreen() {
  
 const s = StyleSheet.create({
   container:        { flex: 1, backgroundColor: C.bgBase, padding: 16 },
-  sectionTitle:     { color: C.cyan, fontSize: 11, fontWeight: '700',
+  sectionTitle:     { color: C.textMuted, fontSize: 11, fontWeight: '700',
                       letterSpacing: 2.5, marginTop: 24, marginBottom: 12 },
   // Presets
-  presetCard:       { backgroundColor: C.bgCard, borderRadius: 14, padding: 12,
+  presetCard:       { backgroundColor: C.bgCard, borderRadius: 12, padding: 12,
                       marginBottom: 8, borderWidth: 1, borderColor: C.border },
-  presetCardActive: { borderColor: '#00D4FF', backgroundColor: '#00D4FF0A' },
+  presetCardActive: { borderColor: C.greenDim, backgroundColor: C.greenFaint },
   presetLabel:      { color: C.textMuted, fontSize: 13, fontWeight: '600' },
-  presetLabelActive:{ color: C.cyan },
+  presetLabelActive:{ color: C.green },
   presetWp:         { color: C.textDim, fontSize: 10, marginTop: 3 },
   // Tags
   tagRow:           { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
   tag:              { backgroundColor: C.bgCard, borderRadius: 8,
                       paddingHorizontal: 12, paddingVertical: 7,
                       borderWidth: 1, borderColor: C.border },
-  tagActive:        { borderColor: '#00D4FF', backgroundColor: '#00D4FF18' },
-  tagActiveGold:    { borderColor: '#FFD700', backgroundColor: '#FFD70018' },
+  tagActive:        { borderColor: C.greenDim, backgroundColor: C.greenFaint },
+  tagActiveGold:    { borderColor: C.goldDim,  backgroundColor: C.goldFaint },
   tagText:          { color: C.textMuted, fontSize: 11, fontWeight: '600' },
-  tagTextActive:    { color: C.cyan },
+  tagTextActive:    { color: C.green },
   tagTextGold:      { color: C.gold },
   // Info
-  infoCard:         { backgroundColor: C.bgDark, borderRadius: 14, padding: 12,
+  infoCard:         { backgroundColor: C.bgDark, borderRadius: 12, padding: 12,
                       marginBottom: 16, borderWidth: 1, borderColor: C.border },
   infoText:         { color: C.textDim, fontSize: 11, lineHeight: 17 },
   // Button
-  btn:              { backgroundColor: '#00D4FF', borderRadius: 16, padding: 16,
+  btn:              { backgroundColor: C.green, borderRadius: 12, padding: 16,
                       alignItems: 'center', marginBottom: 16 },
   btnDisabled:      { opacity: 0.4 },
-  btnText:          { color: '#000919', fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
+  btnText:          { color: C.greenDark, fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
   // Banner
-  banner:           { borderRadius: 16, padding: 16, marginBottom: 14,
+  banner:           { borderRadius: 12, padding: 16, marginBottom: 14,
                       flexDirection: 'row', alignItems: 'center', gap: 12 },
-  bannerGo:         { backgroundColor: '#00FF8818', borderWidth: 1, borderColor: '#00FF88' },
-  bannerNogo:       { backgroundColor: '#FF333318', borderWidth: 1, borderColor: '#FF3333' },
+  bannerGo:         { backgroundColor: C.greenFaint, borderWidth: 1, borderColor: C.greenDim },
+  bannerNogo:       { backgroundColor: C.redFaint,   borderWidth: 1, borderColor: C.redDim },
   bannerIcon:       { fontSize: 22 },
   bannerText:       { color: '#fff', fontSize: 14, fontWeight: '800', flex: 1, letterSpacing: 1 },
   // Card
-  card:             { backgroundColor: C.bgCard, borderRadius: 18, padding: 16,
+  card:             { backgroundColor: C.bgCard, borderRadius: 12, padding: 16,
                       marginBottom: 14, borderWidth: 1, borderColor: C.border },
-  cardTitle:        { color: C.cyan, fontSize: 11, fontWeight: '700',
+  cardTitle:        { color: C.textMuted, fontSize: 11, fontWeight: '700',
                       letterSpacing: 2.5, marginBottom: 14 },
   // Metrics
   metricRow:        { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14 },

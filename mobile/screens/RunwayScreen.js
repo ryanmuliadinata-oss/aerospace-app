@@ -61,7 +61,7 @@ export default function RunwayScreen() {
     } finally { setLoading(false); }
   };
  
-  const CAT_COLORS = { VFR: C.green, MVFR: C.blue, IFR: C.red, LIFR: C.purple };
+  const CAT_COLORS = { VFR: C.green, MVFR: C.gold, IFR: C.red, LIFR: C.red };
  
   return (
     <ScrollView style={S.scroll} showsVerticalScrollIndicator={false}>

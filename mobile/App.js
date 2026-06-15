@@ -1,18 +1,19 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Text, StatusBar } from 'react-native';
-import HistoryScreen from './screens/HistoryScreen';
-import FlightPlanScreen from './screens/FlightPlanScreen';
-import SimulationScreen from './screens/SimulationScreen';
-import DashboardScreen  from './screens/DashboardScreen';
-import MapScreen        from './screens/MapScreen';
+import HistoryScreen       from './screens/HistoryScreen';
+import FlightPlanScreen    from './screens/FlightPlanScreen';
+import SimulationScreen    from './screens/SimulationScreen';
+import DashboardScreen     from './screens/DashboardScreen';
+import MapScreen           from './screens/MapScreen';
 import WeightBalanceScreen from './screens/WeightBalanceScreen';
-import GreatCircleScreen from './screens/GreatCircleScreen';
-import RunwayScreen from './screens/RunwayScreen';
-import EtopsScreen from './screens/EtopsScreen';
-const Tab = createBottomTabNavigator();
- 
+import GreatCircleScreen   from './screens/GreatCircleScreen';
+import RunwayScreen        from './screens/RunwayScreen';
+import EtopsScreen         from './screens/EtopsScreen';
+
+const Tab = createMaterialTopTabNavigator();
+
 const ICONS = {
   'Flight Plan': '✈️',
   'Simulation':  '🛰️',
@@ -24,14 +25,17 @@ const ICONS = {
   'Runway':      '🛬',
   'ETOPS':       '🛡️',
 };
- 
+
 export default function App() {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#13112A" />
+      <StatusBar barStyle="light-content" backgroundColor="#111318" />
       <NavigationContainer>
         <Tab.Navigator
+          tabBarPosition="bottom"
           screenOptions={({ route }) => ({
+            swipeEnabled: true,
+            tabBarScrollEnabled: true,
             tabBarIcon: ({ focused }) => (
               <Text style={{ fontSize: focused ? 20 : 16, opacity: focused ? 1 : 0.45 }}>
                 {ICONS[route.name]}
@@ -40,17 +44,17 @@ export default function App() {
             tabBarActiveTintColor:   '#50DC8C',
             tabBarInactiveTintColor: '#445566',
             tabBarStyle: {
-              backgroundColor: '#0F0E22',
+              backgroundColor: '#111318',
               borderTopColor:  'rgba(255,255,255,0.07)',
               borderTopWidth:  1,
               paddingBottom:   6,
               paddingTop:      4,
               height:          58,
             },
-            tabBarLabelStyle: { fontSize: 9, letterSpacing: 0.5, fontWeight: '600' },
-            headerStyle:      { backgroundColor: '#13112A', borderBottomColor: 'rgba(255,255,255,0.07)' },
-            headerTintColor:  '#FFFFFF',
-            headerTitleStyle: { fontWeight: '700', letterSpacing: 1, fontSize: 15 },
+            tabBarLabelStyle:    { fontSize: 9, letterSpacing: 0.5, fontWeight: '600' },
+            tabBarItemStyle:     { width: 72 },
+            // Indicator appears at the top edge of the tab bar (separates content from tabs)
+            tabBarIndicatorStyle: { backgroundColor: '#50DC8C', height: 2, top: 0 },
           })}
         >
           <Tab.Screen name="Flight Plan" component={FlightPlanScreen} />

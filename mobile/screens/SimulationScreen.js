@@ -15,9 +15,9 @@ const SEV_COLOR = {
  
 const WX_COLOR = {
   VFR:  C.green,
-  MVFR: C.blue,
+  MVFR: C.gold,
   IFR:  C.red,
-  LIFR: C.purple,
+  LIFR: C.red,
 };
  
 const dirToArrow = (deg) => {
@@ -97,7 +97,7 @@ export default function SimulationScreen({ route, navigation }) {
           <h1>✈ Flight Dispatch Report</h1>
           <p><b>Generated:</b> ${new Date().toLocaleString()}</p>
           <div class="banner">
-            ${report.isGo ? '✅ GO — All Systems Nominal' : '❌ ' + report.goNoGoDecision}
+            ${report.isGo ? '✅ GO — All checks passed' : '❌ ' + report.goNoGoDecision}
           </div>
           <h2>ROUTE SUMMARY</h2>
           <table>
@@ -167,7 +167,7 @@ export default function SimulationScreen({ route, navigation }) {
         <Text style={s.bannerIcon}>{report.isGo ? '✅' : '❌'}</Text>
         <Text style={s.bannerText}>
           {report.isGo
-            ? 'GO — All Systems Nominal'
+            ? 'GO — All checks passed'
             : report.goNoGoDecision.replace('NO-GO:', 'NO-GO: ')}
         </Text>
       </View>
@@ -279,11 +279,11 @@ export default function SimulationScreen({ route, navigation }) {
         <FuelBar label="Total Req"
           value={report.fuel.totalRequiredKg}
           max={report.fuel.onBoardKg}
-          color={report.fuel.sufficient ? '#00FF88' : '#FF3333'} />
+          color={report.fuel.sufficient ? '#50DC8C' : '#E05252'} />
         <FuelBar label="On Board"
           value={report.fuel.onBoardKg}
           max={report.fuel.onBoardKg}
-          color="#00D4FF" />
+          color="#50DC8C" />
         <View style={[s.fuelStatus,
           report.fuel.sufficient ? s.fuelOk : s.fuelBad]}>
           <Text style={s.fuelStatusText}>
@@ -347,7 +347,7 @@ export default function SimulationScreen({ route, navigation }) {
       <View style={[s.card, { marginBottom: 14 }]}>
         <View style={s.aqHeader}>
           <Text style={s.cardTitle}>🌫  AIR QUALITY (Open-Meteo)</Text>
-          {aqLoading && <ActivityIndicator size="small" color="#00D4FF" />}
+          {aqLoading && <ActivityIndicator size="small" color="#50DC8C" />}
         </View>
         {airQuality.length === 0 && !aqLoading && (
           <Text style={s.aqEmpty}>No air quality data available.</Text>
@@ -393,7 +393,7 @@ export default function SimulationScreen({ route, navigation }) {
       {/* Fuel Optimization Engine */}
       {report.fuelOptimization && (
         <View style={s.card}>
-          <Text style={s.cardTitle}>⚡  FUEL OPTIMIZATION ENGINE</Text>
+          <Text style={s.cardTitle}>⚡  FUEL OPTIMIZATION</Text>
  
           {/* Savings hero banner */}
           <View style={s.foptBanner}>
@@ -449,7 +449,7 @@ export default function SimulationScreen({ route, navigation }) {
             const isOptimal = fl.flightLevel === report.fuelOptimization.optimalFL;
             return (
               <View key={i} style={[s.foptRow, isOptimal && s.foptRowOptimal]}>
-                <Text style={[s.foptFl, isOptimal && { color: '#00FF88' }, { width: 40 }]}>
+                <Text style={[s.foptFl, isOptimal && { color: '#50DC8C' }, { width: 40 }]}>
                   {isOptimal ? '★' : ''} FL{fl.flightLevel}
                 </Text>
                 <Text style={[s.foptTd, { flex: 1 }, isOptimal && { color: '#fff' }]}>
@@ -460,8 +460,8 @@ export default function SimulationScreen({ route, navigation }) {
                 </Text>
                 <Text style={[s.foptTd, { flex: 1 },
                   fl.headwindKts > 0
-                    ? { color: '#FF8C00' }
-                    : { color: '#00FF88' }]}>
+                    ? { color: C.gold }
+                    : { color: '#50DC8C' }]}>
                   {fl.headwindKts > 0
                     ? `HW ${Math.round(fl.headwindKts)}`
                     : `TW ${Math.round(Math.abs(fl.headwindKts))}`}
@@ -527,18 +527,18 @@ const s = StyleSheet.create({
   bannerNogo:     { backgroundColor: C.redFaint, borderWidth:1, borderColor: C.redDim },
   bannerIcon:     { fontSize:22 },
   bannerText:     { color: C.textPrimary, fontSize:14, fontWeight:'700', flex:1 },
-  mapBtn:         { backgroundColor: C.blueFaint, borderRadius:100, padding:13, alignItems:'center', marginHorizontal:16, marginBottom:10, borderWidth:1, borderColor: C.blueDim },
-  mapBtnText:     { color: C.blue, fontWeight:'700', fontSize:13, letterSpacing:1 },
+  mapBtn:         { backgroundColor: C.greenFaint, borderRadius:100, padding:13, alignItems:'center', marginHorizontal:16, marginBottom:10, borderWidth:1, borderColor: C.greenDim },
+  mapBtnText:     { color: C.green, fontWeight:'700', fontSize:13, letterSpacing:1 },
   shareBtn:       { backgroundColor: C.goldFaint, borderRadius:100, padding:13, alignItems:'center', marginHorizontal:16, marginBottom:10, borderWidth:1, borderColor: C.goldDim },
   shareBtnText:   { color: C.gold, fontWeight:'700', fontSize:13, letterSpacing:1 },
-  card:           { backgroundColor: C.bgCard, borderRadius:18, padding:16, marginBottom:12, marginHorizontal:0, borderWidth:1, borderColor: C.border },
+  card:           { backgroundColor: C.bgCard, borderRadius:12, padding:16, marginBottom:12, marginHorizontal:0, borderWidth:1, borderColor: C.border },
   cardTitle:      { color: C.textMuted, fontSize:10, fontWeight:'700', letterSpacing:2.5, marginBottom:14 },
   routeRow:       { flexDirection:'row', alignItems:'center',
                     justifyContent:'space-between', marginBottom:16 },
   apt:            { alignItems:'center' },
   icao:           { color: C.textPrimary, fontSize:30, fontWeight:'800' },
   icaoSub:        { color: C.textDim, fontSize:9, letterSpacing:2, marginTop:2 },
-  routeArrow:     { color:'#00D4FF', fontSize:16 },
+  routeArrow:     { color: C.textMuted, fontSize:16 },
   statsRow:       { flexDirection:'row', justifyContent:'space-around' },
   stat:           { alignItems:'center' },
   statVal:        { color: C.textPrimary, fontSize:15, fontWeight:'700' },
@@ -559,10 +559,8 @@ const s = StyleSheet.create({
   fuelFill:       { height:'100%', borderRadius:4 },
   fuelVal:        { fontSize:11, fontWeight:'700', width:76, textAlign:'right' },
   fuelStatus:     { borderRadius:8, padding:10, alignItems:'center', marginTop:8 },
-  fuelOk:         { backgroundColor:'#00FF8818',
-                    borderWidth:1, borderColor:'#00FF8844' },
-  fuelBad:        { backgroundColor:'#FF333318',
-                    borderWidth:1, borderColor:'#FF333344' },
+  fuelOk:         { backgroundColor: C.greenFaint, borderWidth:1, borderColor: C.greenDim },
+  fuelBad:        { backgroundColor: C.redFaint,   borderWidth:1, borderColor: C.redDim },
   fuelStatusText: { color: C.textPrimary, fontWeight:'700', fontSize:13 },
   turbRow:        { flexDirection:'row', alignItems:'center',
                     gap:10, paddingVertical:9,
@@ -571,13 +569,13 @@ const s = StyleSheet.create({
   windRow:        { flexDirection:'row', alignItems:'center',
                     gap:10, paddingVertical:9,
                     borderBottomWidth:1, borderBottomColor: 'rgba(255,255,255,0.04)' },
-  windAlt:        { color:'#00D4FF', fontWeight:'700', width:44 },
+  windAlt:        { color: C.green, fontWeight:'700', width:44 },
   windArrow:      { fontSize:16, color: C.textPrimary, width:20, textAlign:'center' },
   windSpeed:      { color: C.textPrimary, fontWeight:'600', flex:1 },
   windDir:        { color: C.textMuted, fontSize:11, width:54 },
   windTemp:       { color: C.textMuted, fontSize:11, width:52, textAlign:'right' },
-  altCard:    { backgroundColor: C.bgCard, borderRadius:14, padding:16,
-                marginBottom:14, borderWidth:1, borderColor:'#FFD70044' },
+  altCard:    { backgroundColor: C.bgCard, borderRadius:12, padding:16,
+                marginBottom:14, borderWidth:1, borderColor: C.goldDim },
   altTitle:   { color: C.gold, fontSize:10, fontWeight:'700', letterSpacing:2.5, marginBottom:14 },
   altRow:     { flexDirection:'row', alignItems:'center',
                 justifyContent:'space-between', paddingVertical:10,
@@ -597,24 +595,24 @@ const s = StyleSheet.create({
   fuelChartBar:    { width:'100%', borderRadius:4, minHeight:4 },
   fuelChartLbl:    { color: C.textDim, fontSize:8, marginTop:4, textAlign:'center' },
   // Fuel Optimization
-  foptBanner:      { flexDirection:'row', backgroundColor:'#0D1526',
+  foptBanner:      { flexDirection:'row', backgroundColor: C.bgDark,
                      borderRadius:10, padding:12, marginBottom:12,
-                     borderWidth:1, borderColor:'#00FF8822' },
+                     borderWidth:1, borderColor: C.greenFaint },
   foptBannerLeft:  { flex:1, alignItems:'center' },
   foptBannerMid:   { flex:1, alignItems:'center' },
   foptBannerRight: { flex:1, alignItems:'center' },
   foptDivider:     { width:1, backgroundColor: C.border, marginHorizontal:8 },
-  foptSavedKg:     { color:'#00FF88', fontSize:18, fontWeight:'800' },
-  foptOptFL:       { color:'#00D4FF', fontSize:18, fontWeight:'800' },
+  foptSavedKg:     { color: C.green, fontSize:18, fontWeight:'800' },
+  foptOptFL:       { color: C.green, fontSize:18, fontWeight:'800' },
   foptSavedLbl:    { color: C.textDim, fontSize:8, letterSpacing:1.5, marginTop:3 },
   foptRec:         { backgroundColor: C.bgCard, borderRadius:8, padding:10,
                      marginBottom:10, borderWidth:1, borderColor: C.border },
   foptRecText:     { color: C.textSecondary, fontSize:11, lineHeight:17 },
   foptStepCard:    { flexDirection:'row', alignItems:'flex-start', gap:8,
-                     backgroundColor:'#FFD70012', borderRadius:8, padding:10,
-                     marginBottom:10, borderWidth:1, borderColor:'#FFD70033' },
+                     backgroundColor: C.goldFaint, borderRadius:8, padding:10,
+                     marginBottom:10, borderWidth:1, borderColor: C.goldDim },
   foptStepIcon:    { fontSize:14 },
-  foptStepText:    { color:'#FFD700', fontSize:11, flex:1, lineHeight:16 },
+  foptStepText:    { color: C.gold, fontSize:11, flex:1, lineHeight:16 },
   foptTableTitle:  { color: C.textDim, fontSize:9, letterSpacing:2,
                      fontWeight:'700', marginBottom:6 },
   foptTableHeader: { flexDirection:'row', paddingBottom:6,
@@ -624,7 +622,7 @@ const s = StyleSheet.create({
                      letterSpacing:1 },
   foptRow:         { flexDirection:'row', alignItems:'center', paddingVertical:7,
                      borderBottomWidth:1, borderBottomColor: 'rgba(255,255,255,0.04)' },
-  foptRowOptimal:  { backgroundColor:'#00FF8808' },
+  foptRowOptimal:  { backgroundColor: C.greenFaint },
   foptFl:          { color: C.textMuted, fontSize:11, fontWeight:'700' },
   foptTd:          { color: C.textMuted, fontSize:11 },
   aqHeader:    { flexDirection:'row', justifyContent:'space-between',
@@ -647,7 +645,7 @@ const s = StyleSheet.create({
   notamHeader: { flexDirection:'row', justifyContent:'space-between',
                  marginBottom:4 },
   notamNumber: { color: C.textPrimary, fontWeight:'700', fontSize:12 },
-  notamClass:  { color:'#00D4FF', fontSize:11 },
+  notamClass:  { color: C.textSecondary, fontSize:11 },
   notamText:   { color: C.textSecondary, fontSize:11, lineHeight:16 },
   notamDate:   { color: C.textDim, fontSize:10, marginTop:4 },
   altReason: { color: C.textDim, fontSize:9, textAlign:'center',

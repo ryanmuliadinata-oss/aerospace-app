@@ -34,7 +34,7 @@ export default function GreatCircleScreen({ navigation }) {
     } finally { setLoading(false); }
   };
  
-  const WP_COLORS = ['#50DC8C', '#78AAFF', '#78AAFF', '#78AAFF', '#78AAFF', '#FF6060'];
+  const WP_COLORS = ['#50DC8C', '#8A9BB0', '#8A9BB0', '#8A9BB0', '#8A9BB0', '#E05252'];
  
   return (
     <ScrollView style={S.scroll} showsVerticalScrollIndicator={false}>
@@ -97,11 +97,11 @@ export default function GreatCircleScreen({ navigation }) {
       </TouchableOpacity>
  
       {result && (<>
-        <View style={S.cardPurple}>
+        <View style={S.card}>
           <Text style={[T.cardTitle, { marginBottom: 14 }]}>ROUTE INFO</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
             <Text style={styles.icao}>{result.origin}</Text>
-            <Text style={{ color: C.purple, fontSize: 16 }}>— 🌍 —</Text>
+            <Text style={{ color: C.textMuted, fontSize: 16 }}>— 🌍 —</Text>
             <Text style={styles.icao}>{result.destination}</Text>
           </View>
           <View style={S.statRow}>
@@ -126,7 +126,7 @@ export default function GreatCircleScreen({ navigation }) {
             <View key={i} style={styles.wpRow}>
               <View style={[styles.wpDot, {
                 backgroundColor: i === 0 ? C.green
-                  : i === result.waypoints.length - 1 ? C.red : C.blue
+                  : i === result.waypoints.length - 1 ? C.red : C.textMuted
               }]} />
               <Text style={styles.wpName}>{wp.name}</Text>
               <Text style={styles.wpCoord}>
@@ -163,6 +163,6 @@ const styles = StyleSheet.create({
   wpDot:   { width: 9, height: 9, borderRadius: 5 },
   wpName:  { color: C.textPrimary, fontWeight: '700', width: 50, fontSize: 12 },
   wpCoord: { color: C.textMuted, fontSize: 11, flex: 1 },
-  wpAlt:   { color: C.blue, fontSize: 11, width: 44, textAlign: 'right' },
+  wpAlt:   { color: C.textMuted, fontSize: 11, width: 44, textAlign: 'right' },
 });
  

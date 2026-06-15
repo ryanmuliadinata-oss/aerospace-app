@@ -10,7 +10,7 @@ const SOURCES = [
   { name: 'Open-Meteo',       desc: 'Winds aloft · Air quality', free: true, color: '#50DC8C' },
   { name: 'OpenAIP',          desc: 'Runway data · Elevation',  free: true,  color: '#50DC8C' },
   { name: 'Sunrise-Sunset',   desc: 'Day/night · Civil twilight', free: true, color: '#50DC8C' },
-  { name: 'FlightAware',      desc: 'Fuel burn · Tracking',    free: false, color: '#FFD770' },
+  { name: 'FlightAware',      desc: 'Fuel burn · Tracking',    free: false, color: '#F0C060' },
 ];
  
 export default function DashboardScreen({ navigation }) {
@@ -25,7 +25,7 @@ export default function DashboardScreen({ navigation }) {
   return (
     <ScrollView style={S.scroll} showsVerticalScrollIndicator={false}>
       <View style={S.titleBlock}>
-        <Text style={[T.screenLabel, { marginBottom: 4 }]}>GOOD MORNING</Text>
+        <Text style={[T.screenLabel, { marginBottom: 4 }]}>STATUS</Text>
         <Text style={T.screenTitle}>Aerospace Dispatch</Text>
       </View>
  
