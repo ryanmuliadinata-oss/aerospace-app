@@ -5,6 +5,8 @@ import com.aerospace.client.NotamClient.NotamItem;
 import com.aerospace.model.*;
 import com.aerospace.service.FuelOptimizationService.FuelOptimizationResult;
 import com.aerospace.util.GeoMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class FlightSimulationOrchestrator {
+
+    private static final Logger log = LoggerFactory.getLogger(FlightSimulationOrchestrator.class);
 
     private final AviationWeatherClient   weatherClient;
     private final OpenMeteoClient         windClient;
@@ -52,7 +56,7 @@ public class FlightSimulationOrchestrator {
                 try {
                     return weatherClient.fetchMetar(wp);
                 } catch (Exception e) {
-                    System.err.println("[Weather] METAR failed for " + wp.name + ": " + e.getMessage());
+                    log.warn("[Weather] METAR failed for {}", wp.name, e);
                     return new WeatherReport(wp, 0, 0, 0, 1013.25, "UNKN", "N/A", false);
                 }
             }))
@@ -62,7 +66,7 @@ public class FlightSimulationOrchestrator {
             try {
                 return windClient.fetchWindLayers(origin.latitude, origin.longitude);
             } catch (Exception e) {
-                System.err.println("[Wind] OpenMeteo failed: " + e.getMessage());
+                log.warn("[Wind] OpenMeteo failed", e);
                 return List.<WindLayer>of();
             }
         });
@@ -71,7 +75,7 @@ public class FlightSimulationOrchestrator {
             try {
                 return fuelClient.fetchFuelEstimate(plan);
             } catch (Exception e) {
-                System.err.println("[Fuel] FlightAware unavailable: " + e.getMessage());
+                log.warn("[Fuel] FlightAware unavailable — using estimate", e);
                 return new FuelReport(plan.flightId,
                     plan.fuelCapacityKg * 0.65,
                     plan.fuelCapacityKg * 0.05,
@@ -84,7 +88,7 @@ public class FlightSimulationOrchestrator {
             try {
                 return turbulenceClient.fetchTurbulence(plan.waypoints);
             } catch (Exception e) {
-                System.err.println("[Turbulence] PIREP failed: " + e.getMessage());
+                log.warn("[Turbulence] PIREP failed", e);
                 return List.<TurbulenceReport>of();
             }
         });
@@ -117,7 +121,7 @@ public class FlightSimulationOrchestrator {
         try {
             fuelOpt = fuelOptService.optimize(plan, windLayers);
         } catch (Exception e) {
-            System.err.println("[FuelOpt] Optimization failed: " + e.getMessage());
+            log.warn("[FuelOpt] Optimization failed", e);
         }
 
         FlightSimulationReport report = new FlightSimulationReport(

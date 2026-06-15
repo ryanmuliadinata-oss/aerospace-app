@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.springframework.core.annotation.Order;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *               recover incrementally rather than waiting the full window.
  */
 @Component
+@Order(10)  // Runs after ApiKeyFilter (@Order 5) — unauthenticated requests never consume tokens.
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final int      MAX_TRACKED_IPS    = 10_000;
@@ -73,8 +76,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
             .build();
     }
 
-    // Behind Railway's reverse proxy the real client IP is in X-Forwarded-For.
-    // Take the leftmost address (originating client), not the proxy's IP.
+    // Railway rewrites X-Forwarded-For before it reaches this filter, so the
+    // leftmost value is the originating client IP, not a spoofable user header.
+    // If the deployment platform changes, verify that XFF is still overwritten
+    // by the trusted proxy rather than appended to attacker-controlled values.
     private static String clientIp(HttpServletRequest request) {
         String xff = request.getHeader("X-Forwarded-For");
         if (xff != null && !xff.isBlank()) {

@@ -4,18 +4,23 @@ import com.aerospace.model.TurbulenceReport;
 import com.aerospace.model.Waypoint;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class TurbulenceClient {
 
+    private static final Logger log = LoggerFactory.getLogger(TurbulenceClient.class);
     private static final String BASE = "https://aviationweather.gov";
 
     private final HttpClient http;
@@ -27,20 +32,13 @@ public class TurbulenceClient {
         List<TurbulenceReport> reports = new ArrayList<>();
 
         for (Waypoint wp : waypoints) {
-            // ── PIREP endpoint per OpenAPI spec ────────────────────────
-            // GET /api/data/pirep
-            //   id       = airport ID for center of search
-            //   distance = radial distance in nm
-            //   age      = hours back
-            //   format   = json
-            //   level    = altitude +-3000ft to search
-            //   inten    = minimum intensity: lgt, mod, sev
+            String id  = URLEncoder.encode(wp.name, StandardCharsets.UTF_8);
             String url = BASE + "/api/data/pirep"
-                + "?id="       + wp.name
+                + "?id="       + id
                 + "&distance=150"
                 + "&age=3"
                 + "&format=json"
-                + "&level="    + (int)(wp.altitudeFt / 100); // convert ft to FL
+                + "&level="    + (int)(wp.altitudeFt / 100);
 
             HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -48,26 +46,15 @@ public class TurbulenceClient {
                 .GET()
                 .build();
 
-            HttpResponse<String> res = http.send(
-                req, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
 
             if (res.statusCode() != 200) {
-                System.err.printf(
-                    "[Turbulence] PIREP %s HTTP %d — marking UNKNOWN%n",
+                log.warn("[Turbulence] PIREP {} HTTP {} — marking UNKNOWN",
                     wp.name, res.statusCode());
-                reports.add(new TurbulenceReport(
-                    wp, "UNKNOWN", wp.altitudeFt, "PIREP-UNAVAILABLE"));
+                reports.add(new TurbulenceReport(wp, "UNKNOWN", wp.altitudeFt, "PIREP-UNAVAILABLE"));
                 continue;
             }
 
-            // PIREPJSON schema per spec:
-            // array of objects with fields:
-            //   tbInt   = turbulence intensity (0-7)
-            //   tbFreq  = turbulence frequency
-            //   tbType  = turbulence type
-            //   fltlvl  = flight level
-            //   acType  = aircraft type
-            //   rawOb   = raw PIREP string
             JSONArray pireps = new JSONArray(res.body());
             String worstSeverity = "NIL";
             double worstAlt      = wp.altitudeFt;
@@ -79,28 +66,22 @@ public class TurbulenceClient {
                 int    tbInt    = p.optInt("tbInt", 0);
                 String severity = mapIntensity(tbInt);
 
-                // Track the altitude of the worst turbulence report
                 if (p.has("fltlvl") && severityRank(severity) >= severityRank(worstSeverity)) {
-                    worstAlt = p.optDouble("fltlvl", wp.altitudeFt / 100.0) * 100; // FL to feet
+                    worstAlt = p.optDouble("fltlvl", wp.altitudeFt / 100.0) * 100;
                 }
-
                 if (severityRank(severity) > severityRank(worstSeverity)) {
                     worstSeverity = severity;
                 }
             }
 
-            System.out.printf("[Turbulence] PIREP %-6s → %d reports, worst: %s%n",
+            log.info("[Turbulence] PIREP {} → {} reports, worst: {}",
                 wp.name, pireps.length(), worstSeverity);
-
-            reports.add(new TurbulenceReport(
-                wp, worstSeverity, worstAlt, "PIREP"));
+            reports.add(new TurbulenceReport(wp, worstSeverity, worstAlt, "PIREP"));
         }
 
         return reports;
     }
 
-    // tbInt scale per AviationWeather spec:
-    // 0 = none, 1-2 = light, 3-4 = moderate, 5-6 = severe, 7 = extreme
     private String mapIntensity(int tbInt) {
         return switch (tbInt) {
             case 0     -> "NIL";

@@ -25,7 +25,8 @@ public class SecurityConfig {
                 .frameOptions(frame -> frame.deny())
                 .httpStrictTransportSecurity(hsts -> hsts
                     .includeSubDomains(true)
-                    .maxAgeInSeconds(31536000))
+                    .maxAgeInSeconds(31536000)
+                    .preload(true))
             )
            .authorizeHttpRequests(auth -> auth
     .requestMatchers("/api/health").permitAll()
@@ -47,7 +48,7 @@ public class SecurityConfig {
             "http://localhost:*"
         ));
         config.setAllowedMethods(List.of("GET", "POST"));
-        config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        config.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Api-Key"));
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

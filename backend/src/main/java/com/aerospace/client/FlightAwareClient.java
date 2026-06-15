@@ -3,6 +3,8 @@ package com.aerospace.client;
 import com.aerospace.model.FlightPlan;
 import com.aerospace.model.FuelReport;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +16,9 @@ import java.net.http.HttpResponse;
 @Component
 public class FlightAwareClient {
 
-    private static final String  BASE       = "https://aeroapi.flightaware.com/aeroapi";
-    private static final double  GAL_TO_KG  = 2.85;
+    private static final Logger log = LoggerFactory.getLogger(FlightAwareClient.class);
+    private static final String BASE      = "https://aeroapi.flightaware.com/aeroapi";
+    private static final double GAL_TO_KG = 2.85;
 
     @Value("${aerospace.api.flightaware.key:}")
     private String apiKey;
@@ -26,7 +29,8 @@ public class FlightAwareClient {
 
     public FuelReport fetchFuelEstimate(FlightPlan plan) throws Exception {
         if (apiKey == null || apiKey.isBlank())
-            throw new RuntimeException("[FlightAware] API key not configured — set FLIGHTAWARE_API_KEY");
+            throw new RuntimeException(
+                "[FlightAware] API key not configured — set FLIGHTAWARE_API_KEY");
 
         HttpRequest req = HttpRequest.newBuilder()
             .uri(URI.create(BASE + "/flights/" + plan.flightId + "/fuel_estimate"))
@@ -37,10 +41,14 @@ public class FlightAwareClient {
 
         HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
 
-        if (res.statusCode() != 200)
+        if (res.statusCode() != 200) {
+            // Log the body for debugging but never expose it to callers.
+            log.warn("[FlightAware] HTTP {} for flight {}: {}",
+                res.statusCode(), plan.flightId,
+                res.body().substring(0, Math.min(200, res.body().length())));
             throw new RuntimeException(
-                "[FlightAware] HTTP " + res.statusCode()
-                + " for flight " + plan.flightId + ": " + res.body());
+                "[FlightAware] HTTP " + res.statusCode() + " — fuel estimate unavailable");
+        }
 
         JSONObject fuel = new JSONObject(res.body()).getJSONObject("fuel_estimate");
 

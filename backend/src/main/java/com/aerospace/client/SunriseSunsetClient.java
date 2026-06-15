@@ -1,6 +1,8 @@
 package com.aerospace.client;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -11,14 +13,18 @@ import java.net.http.HttpResponse;
 @Component
 public class SunriseSunsetClient {
 
+    private static final Logger log = LoggerFactory.getLogger(SunriseSunsetClient.class);
     private static final String BASE = "https://api.sunrise-sunset.org/json";
+
     private final HttpClient http;
 
     public SunriseSunsetClient(HttpClient http) { this.http = http; }
 
     public SunriseSunsetResult fetch(double lat, double lon) {
         try {
-            String url = BASE + "?lat=" + lat + "&lng=" + lon + "&formatted=0";
+            // lat/lon are validated doubles — format to fixed precision to avoid
+            // scientific notation (e.g. 1.23E-5) which would break the URL.
+            String url = String.format("%s?lat=%.6f&lng=%.6f&formatted=0", BASE, lat, lon);
 
             HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -26,27 +32,27 @@ public class SunriseSunsetClient {
                 .GET()
                 .build();
 
-            HttpResponse<String> res = http.send(
-                req, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
 
-            if (res.statusCode() != 200) return defaultResult();
+            if (res.statusCode() != 200) {
+                log.warn("[SunriseSunset] HTTP {}", res.statusCode());
+                return defaultResult();
+            }
 
             JSONObject body    = new JSONObject(res.body());
             JSONObject results = body.optJSONObject("results");
             if (results == null) return defaultResult();
 
-            String sunrise     = results.optString("sunrise",       "N/A");
-            String sunset      = results.optString("sunset",        "N/A");
-            String solarNoon   = results.optString("solar_noon",    "N/A");
-            int    dayLength   = results.optInt("day_length",        0);
-            String civilTwilightBegin = results.optString("civil_twilight_begin", "N/A");
-            String civilTwilightEnd   = results.optString("civil_twilight_end",   "N/A");
-
-            return new SunriseSunsetResult(sunrise, sunset, solarNoon,
-                dayLength, civilTwilightBegin, civilTwilightEnd);
+            return new SunriseSunsetResult(
+                results.optString("sunrise",              "N/A"),
+                results.optString("sunset",               "N/A"),
+                results.optString("solar_noon",           "N/A"),
+                results.optInt("day_length",               0),
+                results.optString("civil_twilight_begin", "N/A"),
+                results.optString("civil_twilight_end",   "N/A"));
 
         } catch (Exception e) {
-            System.err.println("[SunriseSunset] Failed: " + e.getMessage());
+            log.warn("[SunriseSunset] Failed", e);
             return defaultResult();
         }
     }

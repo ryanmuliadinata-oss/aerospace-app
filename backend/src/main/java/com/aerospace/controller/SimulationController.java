@@ -10,6 +10,7 @@ import com.aerospace.service.RunwayAnalysisService;
 import com.aerospace.service.EtopsService;
 import com.aerospace.service.EtopsService.EtopsResult;
 
+import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -250,15 +251,12 @@ public class SimulationController {
     }
 
     private static ResponseEntity<String> err(String msg) {
-        return ResponseEntity.badRequest()
-            .body("{\"error\":\"" + msg + "\"}");
+        return jsonError(msg);
     }
 
-    // Safely embeds an untrusted message in a JSON string.
     private static ResponseEntity<String> jsonError(String msg) {
-        String safe = msg == null ? "Unknown error"
-            : msg.replace("\\", "\\\\").replace("\"", "\\\"");
-        return ResponseEntity.badRequest()
-            .body("{\"error\":\"" + safe + "\"}");
+        JSONObject body = new JSONObject();
+        body.put("error", msg != null ? msg : "Unknown error");
+        return ResponseEntity.badRequest().body(body.toString());
     }
 }

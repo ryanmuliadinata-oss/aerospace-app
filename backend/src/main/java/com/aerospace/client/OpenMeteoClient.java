@@ -3,6 +3,8 @@ package com.aerospace.client;
 import com.aerospace.model.WindLayer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -15,8 +17,8 @@ import java.util.List;
 @Component
 public class OpenMeteoClient {
 
-    private static final String BASE =
-        "https://api.open-meteo.com/v1/forecast";
+    private static final Logger log = LoggerFactory.getLogger(OpenMeteoClient.class);
+    private static final String BASE = "https://api.open-meteo.com/v1/forecast";
 
     private static final int[][] LEVELS = {
         {250, 34000},
@@ -29,8 +31,7 @@ public class OpenMeteoClient {
 
     public OpenMeteoClient(HttpClient http) { this.http = http; }
 
-    public List<WindLayer> fetchWindLayers(double lat, double lon)
-            throws Exception {
+    public List<WindLayer> fetchWindLayers(double lat, double lon) throws Exception {
 
         String url = String.format(
             "%s?latitude=%.4f&longitude=%.4f"
@@ -45,9 +46,10 @@ public class OpenMeteoClient {
             HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
             HttpResponse.BodyHandlers.ofString());
 
-        if (res.statusCode() != 200)
-            throw new RuntimeException(
-                "[OpenMeteo] HTTP " + res.statusCode() + ": " + res.body());
+        if (res.statusCode() != 200) {
+            log.warn("[OpenMeteo] HTTP {}", res.statusCode());
+            throw new RuntimeException("[OpenMeteo] HTTP " + res.statusCode());
+        }
 
         JSONObject hourly = new JSONObject(res.body()).getJSONObject("hourly");
 
