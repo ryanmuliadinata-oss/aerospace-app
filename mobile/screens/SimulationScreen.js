@@ -107,7 +107,7 @@ export default function SimulationScreen({ route, navigation }) {
             <tr><td>Destination</td><td>${report.destination}</td></tr>
             <tr><td>Aircraft</td><td>${report.aircraftType}</td></tr>
             <tr><td>Est. Flight Time</td><td>${report.estimatedFlightTimeHrs?.toFixed(1)} hrs</td></tr>
-            <tr><td>Recommended Altitude</td><td>FL${report.recommendedAltitude}</td></tr>
+            <tr><td>Recommended Altitude</td><td>${report.recommendedAltitude}</td></tr>
           </table>
           <h2>FUEL ANALYSIS</h2>
           <table>
@@ -188,7 +188,7 @@ export default function SimulationScreen({ route, navigation }) {
         </View>
       )}
       {/* View on Map Button */}
-      {report.weather && report.weather.length > 0 && (
+      {report.weather && report.weather.length > 0 && waypoints && waypoints.length > 0 && (
         <TouchableOpacity
           style={s.mapBtn}
           onPress={() => navigation.navigate('Map', {
@@ -224,7 +224,7 @@ export default function SimulationScreen({ route, navigation }) {
           <Stat label="Aircraft" value={report.aircraftType} />
           <Stat label="Est Time" value={`${report.estimatedFlightTimeHrs.toFixed(1)} hr`} />
           <View style={s.stat}>
-  <Text style={s.statVal}>FL{report.recommendedAltitude}</Text>
+  <Text style={s.statVal}>{report.recommendedAltitude}</Text>
   <Text style={s.statLbl}>REC ALT</Text>
   {report.flightLevelReason ? (
     <Text style={s.altReason}>{report.flightLevelReason}</Text>
@@ -502,7 +502,7 @@ export default function SimulationScreen({ route, navigation }) {
                 <Text style={s.notamClass}>{n.classification}</Text>
               </View>
               <Text style={s.notamText}>{n.text}</Text>
-              {n.effectiveStart !== '' && (
+              {n.effectiveStart != null && n.effectiveStart !== '' && (
                 <Text style={s.notamDate}>
                   {n.effectiveStart} → {n.effectiveEnd}
                 </Text>

@@ -81,7 +81,7 @@ export default function FlightPlanScreen({ navigation }) {
       await saveToHistory(result);
       navigation.navigate('Simulation', { report: result, waypoints: preset.plan.waypoints });
     } catch (e) {
-      Alert.alert('Error', e?.response?.data?.message || e.message || 'Server unreachable.');
+      Alert.alert('Error', e?.response?.data?.error || e.message || 'Server unreachable.');
     } finally { setLoading(false); }
   };
  

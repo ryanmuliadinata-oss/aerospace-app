@@ -36,7 +36,7 @@ export const fetchLiveAircraft = async (minLat, maxLat, minLon, maxLon) => {
       .map(s => ({
         icao24:     s[0],
         callsign:   (s[1] || '').trim() || s[0].toUpperCase(),
-        country:    s[2],
+        country:    s[2] ?? '',
         longitude:  s[5],
         latitude:   s[6],
         altitudeM:  s[7] ?? s[13] ?? 0,
