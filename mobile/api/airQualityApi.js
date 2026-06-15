@@ -26,9 +26,12 @@ export const fetchAirQuality = async (lat, lon, name = '') => {
     const hourly = json.hourly;
     if (!hourly) throw new Error('No hourly data');
  
-    // Use the most recent hour that has data
-    const now = new Date();
-    const idx = Math.min(now.getHours(), (hourly.time?.length ?? 1) - 1);
+    // Find the hourly index whose timestamp is closest to now in UTC,
+    // using utc_offset_seconds from the response to convert to location local time.
+    const utcOffsetSec = json.utc_offset_seconds ?? 0;
+    const nowUtcSec = Date.now() / 1000;
+    const localHour = Math.floor((nowUtcSec + utcOffsetSec) / 3600) % 24;
+    const idx = Math.min(localHour, (hourly.time?.length ?? 1) - 1);
  
     const pm25       = hourly.pm2_5?.[idx]       ?? null;
     const pm10       = hourly.pm10?.[idx]        ?? null;
