@@ -1,7 +1,15 @@
 import React from 'react';
+import { View, Text, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { Text, StatusBar } from 'react-native';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
+
 import HistoryScreen       from './screens/HistoryScreen';
 import FlightPlanScreen    from './screens/FlightPlanScreen';
 import SimulationScreen    from './screens/SimulationScreen';
@@ -27,6 +35,17 @@ const ICONS = {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: '#111318' }} />;
+  }
+
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#111318" />
@@ -51,9 +70,8 @@ export default function App() {
               paddingTop:      4,
               height:          58,
             },
-            tabBarLabelStyle:    { fontSize: 9, letterSpacing: 0.5, fontWeight: '600' },
+            tabBarLabelStyle:    { fontFamily: 'Inter_600SemiBold', fontSize: 9, letterSpacing: 0.5 },
             tabBarItemStyle:     { width: 72 },
-            // Indicator appears at the top edge of the tab bar (separates content from tabs)
             tabBarIndicatorStyle: { backgroundColor: '#50DC8C', height: 2, top: 0 },
           })}
         >

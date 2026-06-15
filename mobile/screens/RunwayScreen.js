@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Activi
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import { fetchAirportByIcao, bestRunwayForWind } from '../api/openAipApi';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
  
 const AIRCRAFT = ['B737', 'A320', 'B777', 'B747', 'A380'];
  
@@ -264,16 +264,16 @@ export default function RunwayScreen() {
 }
  
 const styles = StyleSheet.create({
-  apName:      { color: C.green, fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  apName:      { color: C.green, fontSize: 13, fontFamily: F.semiBold, marginBottom: 8 },
   apMeta:      { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginBottom: 10 },
-  apMetaItem:  { color: C.textMuted, fontSize: 11 },
-  apMetaVal:   { color: C.textPrimary, fontWeight: '700' },
+  apMetaItem:  { color: C.textMuted, fontFamily: F.regular, fontSize: 11, lineHeight: 16 },
+  apMetaVal:   { color: C.textPrimary, fontFamily: F.bold },
   rwyRow:      { flexDirection: 'row', alignItems: 'center', gap: 8,
                  paddingVertical: 6, borderTopWidth: 1,
                  borderTopColor: 'rgba(255,255,255,0.05)' },
-  rwyDesig:    { color: C.textPrimary, fontWeight: '700', fontSize: 12, width: 36 },
-  rwyLen:      { color: C.green, fontSize: 11, flex: 1 },
-  rwyHdg:      { color: C.textMuted, fontSize: 11, width: 38 },
-  rwySurface:  { color: C.textDim, fontSize: 10 },
+  rwyDesig:    { color: C.textPrimary, fontFamily: F.bold, fontSize: 12, width: 36 },
+  rwyLen:      { color: C.green, fontFamily: F.semiBold, fontSize: 11, lineHeight: 16, flex: 1 },
+  rwyHdg:      { color: C.textMuted, fontFamily: F.regular, fontSize: 11, lineHeight: 16, width: 38 },
+  rwySurface:  { color: C.textDim, fontFamily: F.regular, fontSize: 10, lineHeight: 15 },
 });
  

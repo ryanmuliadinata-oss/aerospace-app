@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
  
 const HISTORY_KEY = 'flight_history';
  
@@ -99,19 +99,19 @@ const styles = StyleSheet.create({
   clearBtn:       { paddingHorizontal: 12, paddingVertical: 6,
                     borderRadius: 8, backgroundColor: C.redFaint,
                     borderWidth: 1, borderColor: C.redDim },
-  clearText:      { color: C.red, fontSize: 11, fontWeight: '600' },
+  clearText:      { color: C.red, fontSize: 11, fontFamily: F.semiBold },
   emptyState:     { alignItems: 'center', paddingTop: 80 },
   emptyIcon:      { fontSize: 48, marginBottom: 16 },
-  emptyTitle:     { color: C.textPrimary, fontSize: 18, fontWeight: '700' },
-  emptySub:       { color: C.textMuted, fontSize: 13, marginTop: 8, textAlign: 'center' },
+  emptyTitle:     { color: C.textPrimary, fontSize: 18, fontFamily: F.bold },
+  emptySub:       { color: C.textMuted, fontFamily: F.regular, fontSize: 13, lineHeight: 19, marginTop: 8, textAlign: 'center' },
   cardRed:        { borderColor: C.redDim },
   histHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  flightId:       { color: C.textPrimary, fontSize: 15, fontWeight: '700' },
-  date:           { color: C.textMuted, fontSize: 10, marginTop: 2 },
+  flightId:       { color: C.textPrimary, fontSize: 15, fontFamily: F.bold },
+  date:           { color: C.textMuted, fontFamily: F.regular, fontSize: 10, lineHeight: 15, marginTop: 2 },
   goBadge:        { paddingHorizontal: 10, paddingVertical: 4,
                     borderRadius: 100, borderWidth: 1 },
-  goBadgeText:    { fontSize: 10, fontWeight: '800', letterSpacing: 1 },
-  routeIcao:      { color: C.textPrimary, fontSize: 20, fontWeight: '800' },
-  meta:           { color: C.textMuted, fontSize: 11 },
+  goBadgeText:    { fontSize: 10, fontFamily: F.xBold, letterSpacing: 1 },
+  routeIcao:      { color: C.textPrimary, fontSize: 20, fontFamily: F.xBold },
+  meta:           { color: C.textMuted, fontFamily: F.regular, fontSize: 11, lineHeight: 16 },
 });
  

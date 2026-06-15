@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { runSimulation } from '../api/flightApi';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
  
 const HISTORY_KEY = 'flight_history';
  

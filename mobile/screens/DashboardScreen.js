@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { checkHealth } from '../api/flightApi';
 import { API_BASE_URL } from '../config';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
 
 const HISTORY_KEY = 'flight_history';
 
@@ -191,26 +191,26 @@ const styles = StyleSheet.create({
   // Logbook stats
   statGrid:     { flexDirection: 'row', alignItems: 'center', paddingVertical: 4 },
   statCell:     { flex: 1, alignItems: 'center' },
-  statBig:      { color: C.textPrimary, fontSize: 22, fontWeight: '800' },
+  statBig:      { color: C.textPrimary, fontSize: 22, fontFamily: F.xBold },
   statLbl:      { color: C.textMuted, fontSize: 8, letterSpacing: 1.5, marginTop: 4 },
   statDivider:  { width: 1, height: 36, backgroundColor: C.border },
-  lastFlight:   { color: C.textMuted, fontSize: 10, marginTop: 2 },
-  noStats:      { color: C.textDim, fontSize: 12, textAlign: 'center', paddingVertical: 4 },
+  lastFlight:   { color: C.textMuted, fontFamily: F.regular, fontSize: 10, lineHeight: 15, marginTop: 2 },
+  noStats:      { color: C.textDim, fontFamily: F.regular, fontSize: 12, lineHeight: 18, textAlign: 'center', paddingVertical: 4 },
   // API status
   statusRow:    { flexDirection: 'row', alignItems: 'center' },
-  statusName:   { color: C.textPrimary, fontSize: 14, fontWeight: '600' },
-  statusUrl:    { color: C.textDim, fontSize: 10, marginTop: 3 },
+  statusName:   { color: C.textPrimary, fontSize: 14, fontFamily: F.semiBold },
+  statusUrl:    { color: C.textDim, fontFamily: F.regular, fontSize: 10, lineHeight: 15, marginTop: 3 },
   pill:         { flexDirection: 'row', alignItems: 'center', gap: 5,
                   paddingHorizontal: 10, paddingVertical: 5,
                   borderRadius: 100, borderWidth: 1 },
   pillDot:      { width: 6, height: 6, borderRadius: 3 },
-  pillText:     { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
+  pillText:     { fontSize: 10, fontFamily: F.bold, letterSpacing: 1 },
   // Source cards
-  srcName:      { color: C.textPrimary, fontSize: 13, fontWeight: '600' },
-  srcDetail:    { color: C.textMuted, fontSize: 10, marginTop: 2 },
-  srcStat:      { fontSize: 11, fontWeight: '700', textAlign: 'right',
+  srcName:      { color: C.textPrimary, fontSize: 13, fontFamily: F.semiBold },
+  srcDetail:    { color: C.textMuted, fontFamily: F.regular, fontSize: 10, lineHeight: 15, marginTop: 2 },
+  srcStat:      { fontSize: 11, fontFamily: F.bold, textAlign: 'right',
                   maxWidth: 110, flexShrink: 0 },
   freeBadge:    { paddingHorizontal: 7, paddingVertical: 2,
                   borderRadius: 5, borderWidth: 1 },
-  freeText:     { fontSize: 9, fontWeight: '800', letterSpacing: 1 },
+  freeText:     { fontSize: 9, fontFamily: F.xBold, letterSpacing: 1 },
 });

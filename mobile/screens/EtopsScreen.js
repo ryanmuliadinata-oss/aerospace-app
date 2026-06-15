@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
 import {
   View, Text, ScrollView, StyleSheet, TextInput,
   TouchableOpacity, ActivityIndicator, Alert,
@@ -342,7 +342,7 @@ export default function EtopsScreen() {
           </View>
           {result.alternates.map((alt, i) => (
             <View key={i} style={s.tableRow}>
-              <Text style={[s.td, { width: 44, color: C.gold, fontWeight: '700' }]}>
+              <Text style={[s.td, { width: 44, color: C.gold, fontFamily: F.bold }]}>
                 {alt.icao}
               </Text>
               <Text style={[s.td, { flex: 1 }]} numberOfLines={1}>{alt.name}</Text>
@@ -394,13 +394,13 @@ export default function EtopsScreen() {
  
 const s = StyleSheet.create({
   container:        { flex: 1, backgroundColor: C.bgBase, padding: 16 },
-  sectionTitle:     { color: C.textMuted, fontSize: 11, fontWeight: '700',
+  sectionTitle:     { color: C.textMuted, fontSize: 11, fontFamily: F.bold,
                       letterSpacing: 2.5, marginTop: 24, marginBottom: 12 },
   // Presets
   presetCard:       { backgroundColor: C.bgCard, borderRadius: 12, padding: 12,
                       marginBottom: 8, borderWidth: 1, borderColor: C.border },
   presetCardActive: { borderColor: C.greenDim, backgroundColor: C.greenFaint },
-  presetLabel:      { color: C.textMuted, fontSize: 13, fontWeight: '600' },
+  presetLabel:      { color: C.textMuted, fontSize: 13, fontFamily: F.semiBold },
   presetLabelActive:{ color: C.green },
   presetWp:         { color: C.textDim, fontSize: 10, marginTop: 3 },
   // Tags
@@ -410,7 +410,7 @@ const s = StyleSheet.create({
                       borderWidth: 1, borderColor: C.border },
   tagActive:        { borderColor: C.greenDim, backgroundColor: C.greenFaint },
   tagActiveGold:    { borderColor: C.goldDim,  backgroundColor: C.goldFaint },
-  tagText:          { color: C.textMuted, fontSize: 11, fontWeight: '600' },
+  tagText:          { color: C.textMuted, fontSize: 11, fontFamily: F.semiBold },
   tagTextActive:    { color: C.green },
   tagTextGold:      { color: C.gold },
   // Info
@@ -421,23 +421,23 @@ const s = StyleSheet.create({
   btn:              { backgroundColor: C.green, borderRadius: 12, padding: 16,
                       alignItems: 'center', marginBottom: 16 },
   btnDisabled:      { opacity: 0.4 },
-  btnText:          { color: C.greenDark, fontSize: 15, fontWeight: '800', letterSpacing: 1.5 },
+  btnText:          { color: C.greenDark, fontSize: 15, fontFamily: F.xBold, letterSpacing: 1.5 },
   // Banner
   banner:           { borderRadius: 12, padding: 16, marginBottom: 14,
                       flexDirection: 'row', alignItems: 'center', gap: 12 },
   bannerGo:         { backgroundColor: C.greenFaint, borderWidth: 1, borderColor: C.greenDim },
   bannerNogo:       { backgroundColor: C.redFaint,   borderWidth: 1, borderColor: C.redDim },
   bannerIcon:       { fontSize: 22 },
-  bannerText:       { color: '#fff', fontSize: 14, fontWeight: '800', flex: 1, letterSpacing: 1 },
+  bannerText:       { color: '#fff', fontSize: 14, fontFamily: F.xBold, flex: 1, letterSpacing: 1 },
   // Card
   card:             { backgroundColor: C.bgCard, borderRadius: 12, padding: 16,
                       marginBottom: 14, borderWidth: 1, borderColor: C.border },
-  cardTitle:        { color: C.textMuted, fontSize: 11, fontWeight: '700',
+  cardTitle:        { color: C.textMuted, fontSize: 11, fontFamily: F.bold,
                       letterSpacing: 2.5, marginBottom: 14 },
   // Metrics
   metricRow:        { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 14 },
   metric:           { alignItems: 'center' },
-  metricVal:        { fontSize: 18, fontWeight: '800' },
+  metricVal:        { fontSize: 18, fontFamily: F.xBold },
   metricLbl:        { color: C.textDim, fontSize: 8, letterSpacing: 1.5, marginTop: 4 },
   assessCard:       { backgroundColor: C.bgDark, borderRadius: 8, padding: 10,
                       borderWidth: 1, borderColor: C.border },
@@ -452,7 +452,7 @@ const s = StyleSheet.create({
   dataRow:          { flexDirection: 'row', justifyContent: 'space-between',
                       paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: C.border },
   dataLbl:          { color: C.textMuted, fontSize: 11 },
-  dataVal:          { color: '#fff', fontSize: 11, fontWeight: '600',
+  dataVal:          { color: '#fff', fontSize: 11, fontFamily: F.semiBold,
                       flex: 1, textAlign: 'right' },
   // Table
   tableHeader:      { flexDirection: 'row', paddingBottom: 6,
@@ -460,7 +460,7 @@ const s = StyleSheet.create({
   tableRow:         { flexDirection: 'row', alignItems: 'center',
                       paddingVertical: 7, borderBottomWidth: 1,
                       borderBottomColor: 'rgba(255,255,255,0.04)' },
-  th:               { color: C.textDim, fontSize: 9, fontWeight: '700', letterSpacing: 1 },
+  th:               { color: C.textDim, fontSize: 9, fontFamily: F.bold, letterSpacing: 1 },
   td:               { color: C.textSecondary, fontSize: 11 },
 });
  

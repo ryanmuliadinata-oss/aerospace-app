@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { getGreatCircleRoute } from '../api/flightApi';
-import { C, S, T } from '../theme';
+import { C, F, S, T } from '../theme';
  
 const AIRPORT_PAIRS = [
   { label: 'LAX → JFK', origin: 'KLAX', dest: 'KJFK' },
@@ -156,13 +156,13 @@ export default function GreatCircleScreen({ navigation }) {
 }
  
 const styles = StyleSheet.create({
-  icao:    { color: C.textPrimary, fontSize: 28, fontWeight: '800' },
+  icao:    { color: C.textPrimary, fontSize: 28, fontFamily: F.xBold },
   wpRow:   { flexDirection: 'row', alignItems: 'center', gap: 10,
              paddingVertical: 9, borderBottomWidth: 1,
              borderBottomColor: 'rgba(255,255,255,0.05)' },
   wpDot:   { width: 9, height: 9, borderRadius: 5 },
-  wpName:  { color: C.textPrimary, fontWeight: '700', width: 50, fontSize: 12 },
-  wpCoord: { color: C.textMuted, fontSize: 11, flex: 1 },
-  wpAlt:   { color: C.textMuted, fontSize: 11, width: 44, textAlign: 'right' },
+  wpName:  { color: C.textPrimary, fontFamily: F.bold, width: 50, fontSize: 12 },
+  wpCoord: { color: C.textMuted, fontFamily: F.regular, fontSize: 11, lineHeight: 16, flex: 1 },
+  wpAlt:   { color: C.textMuted, fontFamily: F.regular, fontSize: 11, lineHeight: 16, width: 44, textAlign: 'right' },
 });
  
