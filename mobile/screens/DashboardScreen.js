@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,46 +7,6 @@ import { API_BASE_URL } from '../config';
 import { C, F, S, T } from '../theme';
 
 const HISTORY_KEY = 'flight_history';
-
-// Concrete specs per data source — not marketing copy, just what they actually provide
-const SOURCES = [
-  {
-    name:   'Aviation Weather',
-    stat:   '~50K airports',
-    detail: 'METAR · TAF · SIGMET · PIREP',
-    free:   true,
-  },
-  {
-    name:   'OpenSky Network',
-    stat:   'Live · 30 s refresh',
-    detail: 'ADS-B · Mode-S transponders',
-    free:   true,
-  },
-  {
-    name:   'Open-Meteo',
-    stat:   '2 km res · 16-day',
-    detail: 'Winds aloft · 7 pressure levels',
-    free:   true,
-  },
-  {
-    name:   'OpenAIP',
-    stat:   '~60K airports',
-    detail: 'Runways · ILS · Elevation',
-    free:   true,
-  },
-  {
-    name:   'Sunrise-Sunset',
-    stat:   'Sub-second precision',
-    detail: 'Civil · Nautical · Astronomical',
-    free:   true,
-  },
-  {
-    name:   'FlightAware',
-    stat:   'AeroAPI v4',
-    detail: 'Block fuel · Flight tracking',
-    free:   false,
-  },
-];
 
 export default function DashboardScreen({ navigation }) {
   const [status,  setStatus]  = useState('checking');
@@ -152,31 +112,6 @@ export default function DashboardScreen({ navigation }) {
         </View>
       </View>
 
-      {/* ── Data sources with real specs ── */}
-      <Text style={S.sectionHeader}>DATA SOURCES</Text>
-      {SOURCES.map((src, i) => (
-        <View key={i} style={[S.card, { flexDirection: 'row', alignItems: 'center' }]}>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-              <Text style={styles.srcName}>{src.name}</Text>
-              <View style={[styles.freeBadge, {
-                borderColor:     src.free ? C.greenDim  : C.goldDim,
-                backgroundColor: src.free ? C.greenFaint : C.goldFaint,
-              }]}>
-                <Text style={[styles.freeText, { color: src.free ? C.green : C.gold }]}>
-                  {src.free ? 'FREE' : 'PAID'}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.srcDetail}>{src.detail}</Text>
-          </View>
-          {/* Real spec instead of a colored dot */}
-          <Text style={[styles.srcStat, { color: src.free ? C.green : C.gold }]}>
-            {src.stat}
-          </Text>
-        </View>
-      ))}
-
       <TouchableOpacity
         style={[S.btnPrimary, { marginTop: 16, marginBottom: 48 }]}
         onPress={() => navigation.navigate('Flight Plan')}>
@@ -205,12 +140,4 @@ const styles = StyleSheet.create({
                   borderRadius: 100, borderWidth: 1 },
   pillDot:      { width: 6, height: 6, borderRadius: 3 },
   pillText:     { fontSize: 10, fontFamily: F.bold, letterSpacing: 1 },
-  // Source cards
-  srcName:      { color: C.textPrimary, fontSize: 13, fontFamily: F.semiBold },
-  srcDetail:    { color: C.textMuted, fontFamily: F.regular, fontSize: 10, lineHeight: 15, marginTop: 2 },
-  srcStat:      { fontSize: 11, fontFamily: F.bold, textAlign: 'right',
-                  maxWidth: 110, flexShrink: 0 },
-  freeBadge:    { paddingHorizontal: 7, paddingVertical: 2,
-                  borderRadius: 5, borderWidth: 1 },
-  freeText:     { fontSize: 9, fontFamily: F.xBold, letterSpacing: 1 },
 });
