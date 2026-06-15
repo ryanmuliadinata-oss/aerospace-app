@@ -20,8 +20,7 @@ public class AviationWeatherClient {
 
     public AviationWeatherClient(HttpClient http) { this.http = http; }
 
-    public WeatherReport fetchMetar(String userId, Waypoint waypoint)
-            throws Exception {
+    public WeatherReport fetchMetar(Waypoint waypoint) throws Exception {
 
         // ── METAR endpoint per OpenAPI spec ───────────────────────────
         // GET /api/data/metar?ids=KLAX&format=json&taf=false&hours=2

@@ -22,8 +22,7 @@ public class TurbulenceClient {
 
     public TurbulenceClient(HttpClient http) { this.http = http; }
 
-    public List<TurbulenceReport> fetchTurbulence(
-            String userId, List<Waypoint> waypoints) throws Exception {
+    public List<TurbulenceReport> fetchTurbulence(List<Waypoint> waypoints) throws Exception {
 
         List<TurbulenceReport> reports = new ArrayList<>();
 

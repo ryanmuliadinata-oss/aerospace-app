@@ -1,17 +1,19 @@
 package com.aerospace.service;
- 
+
 import com.aerospace.client.*;
+import com.aerospace.client.NotamClient.NotamItem;
 import com.aerospace.model.*;
 import com.aerospace.service.FuelOptimizationService.FuelOptimizationResult;
 import com.aerospace.util.GeoMath;
 import org.springframework.stereotype.Service;
- 
+
 import java.util.ArrayList;
 import java.util.List;
- 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class FlightSimulationOrchestrator {
- 
+
     private final AviationWeatherClient   weatherClient;
     private final OpenMeteoClient         windClient;
     private final FlightAwareClient       fuelClient;
@@ -20,7 +22,7 @@ public class FlightSimulationOrchestrator {
     private final NotamClient             notamClient;
     private final SunriseSunsetClient     sunriseSunsetClient;
     private final FuelOptimizationService fuelOptService;
- 
+
     public FlightSimulationOrchestrator(
             AviationWeatherClient   weatherClient,
             OpenMeteoClient         windClient,
@@ -39,54 +41,78 @@ public class FlightSimulationOrchestrator {
         this.sunriseSunsetClient = sunriseSunsetClient;
         this.fuelOptService      = fuelOptService;
     }
- 
-    public FlightSimulationReport simulate(String userId, FlightPlan plan)
-            throws Exception {
- 
-        List<WeatherReport> weatherReports = new ArrayList<>();
-        for (Waypoint wp : plan.waypoints) {
+
+    public FlightSimulationReport simulate(FlightPlan plan) throws Exception {
+        Waypoint origin = plan.waypoints.get(0);
+        Waypoint dest   = plan.waypoints.get(plan.waypoints.size() - 1);
+
+        // Fan out all network I/O simultaneously ──────────────────────────────
+        List<CompletableFuture<WeatherReport>> metarFutures = plan.waypoints.stream()
+            .map(wp -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    return weatherClient.fetchMetar(wp);
+                } catch (Exception e) {
+                    System.err.println("[Weather] METAR failed for " + wp.name + ": " + e.getMessage());
+                    return new WeatherReport(wp, 0, 0, 0, 1013.25, "UNKN", "N/A", false);
+                }
+            }))
+            .toList();
+
+        var windFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                weatherReports.add(weatherClient.fetchMetar(userId, wp));
+                return windClient.fetchWindLayers(origin.latitude, origin.longitude);
             } catch (Exception e) {
-                System.err.println("[Weather] METAR failed for " + wp.name + ": " + e.getMessage());
-                weatherReports.add(new WeatherReport(wp, 0, 0, 0, 1013.25, "UNKN", "N/A", false));
+                System.err.println("[Wind] OpenMeteo failed: " + e.getMessage());
+                return List.<WindLayer>of();
             }
-        }
- 
-        List<WindLayer> windLayers = new ArrayList<>();
-        try {
-            Waypoint first = plan.waypoints.get(0);
-            windLayers = windClient.fetchWindLayers(first.latitude, first.longitude);
-        } catch (Exception e) {
-            System.err.println("[Wind] OpenMeteo failed: " + e.getMessage());
-        }
- 
-        FuelReport fuelReport;
-        try {
-            fuelReport = fuelClient.fetchFuelEstimate(userId, plan);
-        } catch (Exception e) {
-            System.err.println("[Fuel] FlightAware unavailable: " + e.getMessage());
-            double estimatedBurn    = plan.fuelCapacityKg * 0.65;
-            double estimatedReserve = plan.fuelCapacityKg * 0.05;
-            double estimatedAltn    = plan.fuelCapacityKg * 0.10;
-            fuelReport = new FuelReport(plan.flightId, estimatedBurn,
-                estimatedReserve, estimatedAltn, plan.fuelCapacityKg);
-        }
- 
-        List<TurbulenceReport> turbulenceReports = new ArrayList<>();
-        try {
-            turbulenceReports = turbulenceClient.fetchTurbulence(userId, plan.waypoints);
-        } catch (Exception e) {
-            System.err.println("[Turbulence] PIREP failed: " + e.getMessage());
-        }
- 
-        double flightTimeHrs = plan.cruiseSpeedKts > 0
+        });
+
+        var fuelFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return fuelClient.fetchFuelEstimate(plan);
+            } catch (Exception e) {
+                System.err.println("[Fuel] FlightAware unavailable: " + e.getMessage());
+                return new FuelReport(plan.flightId,
+                    plan.fuelCapacityKg * 0.65,
+                    plan.fuelCapacityKg * 0.05,
+                    plan.fuelCapacityKg * 0.10,
+                    plan.fuelCapacityKg);
+            }
+        });
+
+        var turbFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return turbulenceClient.fetchTurbulence(plan.waypoints);
+            } catch (Exception e) {
+                System.err.println("[Turbulence] PIREP failed: " + e.getMessage());
+                return List.<TurbulenceReport>of();
+            }
+        });
+
+        // NOTAMs: origin and destination fetched concurrently
+        var notamFuture = CompletableFuture.supplyAsync(() -> {
+            var of = CompletableFuture.supplyAsync(() -> notamClient.fetchNotams(plan.origin));
+            var df = CompletableFuture.supplyAsync(() -> notamClient.fetchNotams(plan.destination));
+            List<NotamItem> notams = new ArrayList<>(of.join());
+            notams.addAll(df.join());
+            return notams;
+        });
+
+        var sunFuture = CompletableFuture.supplyAsync(() ->
+            sunriseSunsetClient.fetch(origin.latitude, origin.longitude));
+
+        // Collect all I/O results ─────────────────────────────────────────────
+        List<WeatherReport>    weatherReports    = metarFutures.stream().map(CompletableFuture::join).toList();
+        List<WindLayer>        windLayers        = windFuture.join();
+        FuelReport             fuelReport        = fuelFuture.join();
+        List<TurbulenceReport> turbulenceReports = turbFuture.join();
+
+        // Local computation (no network I/O) ──────────────────────────────────
+        double flightTimeHrs  = plan.cruiseSpeedKts > 0
             ? GeoMath.routeDistanceNm(plan.waypoints) / plan.cruiseSpeedKts
             : 0;
- 
         String recommendedAlt = optimizeFlightLevel(windLayers, plan);
- 
-        // Run fuel optimization engine
+
         FuelOptimizationResult fuelOpt = null;
         try {
             fuelOpt = fuelOptService.optimize(plan, windLayers);
@@ -97,34 +123,24 @@ public class FlightSimulationOrchestrator {
         FlightSimulationReport report = new FlightSimulationReport(
             plan, weatherReports, fuelReport,
             windLayers, turbulenceReports, recommendedAlt, flightTimeHrs);
- 
+
         report.flightLevelReason = buildFlightLevelReason(windLayers, recommendedAlt);
         report.fuelOptimization  = fuelOpt;
- 
-        // Suggest alternates only on NO-GO
+
         if (!report.goNoGoDecision.startsWith("GO")) {
-            Waypoint dest = plan.waypoints.get(plan.waypoints.size() - 1);
-            report.alternates = alternateService.suggest(
-                plan.origin, plan.destination, dest);
+            report.alternates = alternateService.suggest(plan.origin, plan.destination, dest);
         }
- 
-        // Fetch NOTAMs for origin and destination
-        List<com.aerospace.client.NotamClient.NotamItem> notams = new ArrayList<>();
-        notams.addAll(notamClient.fetchNotams(plan.origin));
-        notams.addAll(notamClient.fetchNotams(plan.destination));
-        report.notams = notams;
- 
-        // Fetch sunrise/sunset for origin
-        Waypoint origin = plan.waypoints.get(0);
-        report.sunriseSunset = sunriseSunsetClient.fetch(
-            origin.latitude, origin.longitude);
- 
+
+        // These were already in flight while local computation ran
+        report.notams        = notamFuture.join();
+        report.sunriseSunset = sunFuture.join();
+
         return report;
     }
- 
+
     private String optimizeFlightLevel(List<WindLayer> windLayers, FlightPlan plan) {
         if (windLayers.isEmpty()) return "FL350";
- 
+
         return windLayers.stream()
             .map(w -> {
                 double headwindPenalty = w.speedKts * 0.5;
@@ -138,12 +154,11 @@ public class FlightSimulationOrchestrator {
             .map(w -> "FL" + (int)(w[1] / 100))
             .orElse("FL350");
     }
- 
-    private String buildFlightLevelReason(List<WindLayer> windLayers,
-                                           String selectedAlt) {
+
+    private String buildFlightLevelReason(List<WindLayer> windLayers, String selectedAlt) {
         if (windLayers.isEmpty())
             return "Default cruise altitude — no wind data available";
- 
+
         return windLayers.stream()
             .filter(w -> selectedAlt.equals("FL" + (int)(w.altitudeFt / 100)))
             .findFirst()
@@ -152,5 +167,4 @@ public class FlightSimulationOrchestrator {
                 w.speedKts, w.temperatureCelsius, selectedAlt))
             .orElse("Optimal based on winds aloft data");
     }
- 
 }

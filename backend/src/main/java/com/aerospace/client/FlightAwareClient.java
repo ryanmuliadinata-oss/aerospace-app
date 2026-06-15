@@ -1,11 +1,9 @@
 package com.aerospace.client;
 
-import com.aerospace.model.AerospaceApi;
 import com.aerospace.model.FlightPlan;
 import com.aerospace.model.FuelReport;
-import com.aerospace.store.ApiCredential;
-import com.aerospace.store.ApiKeyStore;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -16,39 +14,35 @@ import java.net.http.HttpResponse;
 @Component
 public class FlightAwareClient {
 
-    private static final double GAL_TO_KG = 2.85;
+    private static final String  BASE       = "https://aeroapi.flightaware.com/aeroapi";
+    private static final double  GAL_TO_KG  = 2.85;
 
-    private final ApiKeyStore store;
-    private final HttpClient  http;
+    @Value("${aerospace.api.flightaware.key:}")
+    private String apiKey;
 
-    public FlightAwareClient(ApiKeyStore store, HttpClient http) {
-        this.store = store;
-        this.http  = http;
-    }
+    private final HttpClient http;
 
-    public FuelReport fetchFuelEstimate(String userId, FlightPlan plan)
-            throws Exception {
+    public FlightAwareClient(HttpClient http) { this.http = http; }
 
-        ApiCredential cred = store.get(userId, AerospaceApi.FLIGHTAWARE);
+    public FuelReport fetchFuelEstimate(FlightPlan plan) throws Exception {
+        if (apiKey == null || apiKey.isBlank())
+            throw new RuntimeException("[FlightAware] API key not configured — set FLIGHTAWARE_API_KEY");
 
         HttpRequest req = HttpRequest.newBuilder()
-            .uri(URI.create(AerospaceApi.FLIGHTAWARE.baseUrl
-                + "/flights/" + plan.flightId + "/fuel_estimate"))
-            .header("x-apikey", cred.rawKey())
+            .uri(URI.create(BASE + "/flights/" + plan.flightId + "/fuel_estimate"))
+            .header("x-apikey", apiKey)
             .header("Accept", "application/json; charset=UTF-8")
             .GET()
             .build();
 
-        HttpResponse<String> res = http.send(
-            req, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (res.statusCode() != 200)
             throw new RuntimeException(
                 "[FlightAware] HTTP " + res.statusCode()
                 + " for flight " + plan.flightId + ": " + res.body());
 
-        JSONObject fuel = new JSONObject(res.body())
-            .getJSONObject("fuel_estimate");
+        JSONObject fuel = new JSONObject(res.body()).getJSONObject("fuel_estimate");
 
         return new FuelReport(plan.flightId,
             fuel.getDouble("burn_gallons")      * GAL_TO_KG,

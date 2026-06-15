@@ -91,8 +91,7 @@ public class SimulationController {
             Instant.now()
         );
  
-        FlightSimulationReport report =
-            orchestrator.simulate("system", plan);
+        FlightSimulationReport report = orchestrator.simulate(plan);
  
         return ResponseEntity.ok(SimulationResponse.from(report));
     }
