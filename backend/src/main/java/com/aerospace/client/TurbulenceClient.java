@@ -80,12 +80,12 @@ public class TurbulenceClient {
                 JSONObject p = pireps.getJSONObject(i);
                 if (!p.has("tbInt")) continue;
 
-                int    tbInt    = p.getInt("tbInt");
+                int    tbInt    = p.optInt("tbInt", 0);
                 String severity = mapIntensity(tbInt);
 
                 // Track the altitude of the worst turbulence report
                 if (p.has("fltlvl") && severityRank(severity) >= severityRank(worstSeverity)) {
-                    worstAlt = p.getDouble("fltlvl") * 100; // FL to feet
+                    worstAlt = p.optDouble("fltlvl", wp.altitudeFt / 100.0) * 100; // FL to feet
                 }
 
                 if (severityRank(severity) > severityRank(worstSeverity)) {

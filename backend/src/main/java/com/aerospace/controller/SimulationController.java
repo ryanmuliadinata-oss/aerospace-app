@@ -71,6 +71,9 @@ public class SimulationController {
                 .body("{\"error\":\"Waypoints must be between 2 and 20\"}");
  
         for (Waypoint wp : req.waypoints) {
+            if (wp.name == null || wp.name.isBlank() || wp.name.length() > 10)
+                return ResponseEntity.badRequest()
+                    .body("{\"error\":\"Invalid waypoint name\"}");
             if (wp.latitude < -90 || wp.latitude > 90 ||
                 wp.longitude < -180 || wp.longitude > 180)
                 return ResponseEntity.badRequest()

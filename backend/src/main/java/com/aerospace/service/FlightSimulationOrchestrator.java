@@ -86,14 +86,19 @@ public class FlightSimulationOrchestrator {
         String recommendedAlt = optimizeFlightLevel(windLayers, plan);
  
         // Run fuel optimization engine
-        FuelOptimizationResult fuelOpt = fuelOptService.optimize(plan, windLayers);
- 
+        FuelOptimizationResult fuelOpt = null;
+        try {
+            fuelOpt = fuelOptService.optimize(plan, windLayers);
+        } catch (Exception e) {
+            System.err.println("[FuelOpt] Optimization failed: " + e.getMessage());
+        }
+
         FlightSimulationReport report = new FlightSimulationReport(
             plan, weatherReports, fuelReport,
             windLayers, turbulenceReports, recommendedAlt, flightTimeHrs);
  
-        report.flightLevelReason  = buildFlightLevelReason(windLayers, recommendedAlt);
-        report.fuelOptimization   = fuelOpt;
+        report.flightLevelReason = buildFlightLevelReason(windLayers, recommendedAlt);
+        report.fuelOptimization  = fuelOpt;
  
         // Suggest alternates only on NO-GO
         if (!report.goNoGoDecision.startsWith("GO")) {

@@ -39,17 +39,20 @@ public class FlightSimulationReport {
         boolean hasSigmet  = weather.stream().anyMatch(w -> w.sigmetAlert);
         boolean severeTurb = turbulence.stream().anyMatch(t ->
             t.severity.equals("SEVERE") || t.severity.equals("EXTREME"));
- 
-        this.goNoGoDecision = (!hasSigmet && !severeTurb && fuel.fuelSufficient)
+        boolean criticalWx = weather.stream().anyMatch(w ->
+            "LIFR".equals(w.flightCategory) || "IFR".equals(w.flightCategory));
+
+        this.goNoGoDecision = (!hasSigmet && !severeTurb && fuel.fuelSufficient && !criticalWx)
             ? "GO"
-            : "NO-GO:" + buildReason(hasSigmet, severeTurb, fuel.fuelSufficient);
+            : "NO-GO:" + buildReason(hasSigmet, severeTurb, fuel.fuelSufficient, criticalWx);
     }
- 
-    private String buildReason(boolean sigmet, boolean turb, boolean fuelOk) {
+
+    private String buildReason(boolean sigmet, boolean turb, boolean fuelOk, boolean criticalWx) {
         List<String> r = new ArrayList<>();
-        if (sigmet)  r.add("Active SIGMET");
-        if (turb)    r.add("Severe turbulence");
-        if (!fuelOk) r.add("Insufficient fuel");
+        if (sigmet)     r.add("Active SIGMET");
+        if (turb)       r.add("Severe turbulence");
+        if (!fuelOk)    r.add("Insufficient fuel");
+        if (criticalWx) r.add("IFR/LIFR conditions");
         return String.join("|", r);
     }
     public SunriseSunsetClient.SunriseSunsetResult sunriseSunset = null;

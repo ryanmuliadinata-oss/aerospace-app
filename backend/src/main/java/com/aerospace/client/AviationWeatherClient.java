@@ -56,7 +56,14 @@ public class AviationWeatherClient {
         //   altim = altimeter setting (hPa)
         //   fltcat = flight category (VFR/MVFR/IFR/LIFR)
         //   rawOb  = raw METAR string
-        JSONArray arr = new JSONArray(res.body());
+        JSONArray arr;
+        try {
+            arr = new JSONArray(res.body());
+        } catch (Exception e) {
+            throw new RuntimeException(
+                "[AviationWeather] METAR non-JSON response for " + waypoint.name
+                + ": " + res.body().substring(0, Math.min(200, res.body().length())));
+        }
         if (arr.isEmpty())
             throw new RuntimeException(
                 "No METAR returned for station: " + waypoint.name);
@@ -99,18 +106,20 @@ public class AviationWeatherClient {
                 + " for " + icaoCode);
 
         // Return raw TAF text for display
-        JSONArray arr = new JSONArray(res.body());
+        JSONArray arr;
+        try {
+            arr = new JSONArray(res.body());
+        } catch (Exception e) {
+            return "TAF parse error for " + icaoCode;
+        }
         if (arr.isEmpty()) return "No TAF available";
         return arr.getJSONObject(0).optString("rawTAF", "N/A");
     }
 
     private boolean checkAirSigmet(Waypoint wp) throws Exception {
         // ── Domestic SIGMET/AIRMET endpoint per OpenAPI spec ───────────
-        // GET /api/data/airsigmet?format=json&hazard=turb
-        // hazard options per spec: conv, turb, ice, ifr
-        String url = BASE + "/api/data/airsigmet"
-            + "?format=json"
-            + "&hazard=turb";
+        // No hazard filter — check all hazards (conv, turb, ice, ifr)
+        String url = BASE + "/api/data/airsigmet?format=json";
 
         HttpRequest req = HttpRequest.newBuilder()
             .uri(URI.create(url))
@@ -125,42 +134,23 @@ public class AviationWeatherClient {
 
         // AirSigmetJSON schema per spec:
         // array of objects with coords array [{lat, lon}] and hazard string
-        JSONArray sigmets = new JSONArray(res.body());
+        JSONArray sigmets;
+        try { sigmets = new JSONArray(res.body()); } catch (Exception e) { return false; }
+
         for (int i = 0; i < sigmets.length(); i++) {
             JSONObject s = sigmets.getJSONObject(i);
-
-            // Each SIGMET has a coords array of {lat, lon} objects
             if (!s.has("coords")) continue;
-            JSONArray coords = s.getJSONArray("coords");
-
-            double minLat =  90, maxLat = -90;
-            double minLon = 180, maxLon = -180;
-
-            for (int j = 0; j < coords.length(); j++) {
-                JSONObject pt  = coords.getJSONObject(j);
-                double    lat  = pt.optDouble("lat", 0);
-                double    lon  = pt.optDouble("lon", 0);
-                if (lat < minLat) minLat = lat;
-                if (lat > maxLat) maxLat = lat;
-                if (lon < minLon) minLon = lon;
-                if (lon > maxLon) maxLon = lon;
-            }
-
-            if (wp.latitude  >= minLat && wp.latitude  <= maxLat
-             && wp.longitude >= minLon && wp.longitude <= maxLon)
-                return true;
+            if (waypointInSigmet(wp, s.getJSONArray("coords"))) return true;
         }
 
-        // Also check international SIGMETs for transatlantic routes
+        // Also check international SIGMETs for transatlantic/transpacific routes
         return checkISigmet(wp);
     }
 
     private boolean checkISigmet(Waypoint wp) throws Exception {
         // ── International SIGMET endpoint per OpenAPI spec ─────────────
-        // GET /api/data/isigmet?format=json&hazard=turb
-        String url = BASE + "/api/data/isigmet"
-            + "?format=json"
-            + "&hazard=turb";
+        // No hazard filter — check all hazards
+        String url = BASE + "/api/data/isigmet?format=json";
 
         HttpRequest req = HttpRequest.newBuilder()
             .uri(URI.create(url))
@@ -173,29 +163,55 @@ public class AviationWeatherClient {
 
         if (res.statusCode() != 200) return false;
 
-        JSONArray sigmets = new JSONArray(res.body());
+        JSONArray sigmets;
+        try { sigmets = new JSONArray(res.body()); } catch (Exception e) { return false; }
+
         for (int i = 0; i < sigmets.length(); i++) {
             JSONObject s = sigmets.getJSONObject(i);
             if (!s.has("coords")) continue;
-            JSONArray coords = s.getJSONArray("coords");
-
-            double minLat =  90, maxLat = -90;
-            double minLon = 180, maxLon = -180;
-
-            for (int j = 0; j < coords.length(); j++) {
-                JSONObject pt = coords.getJSONObject(j);
-                double lat    = pt.optDouble("lat", 0);
-                double lon    = pt.optDouble("lon", 0);
-                if (lat < minLat) minLat = lat;
-                if (lat > maxLat) maxLat = lat;
-                if (lon < minLon) minLon = lon;
-                if (lon > maxLon) maxLon = lon;
-            }
-
-            if (wp.latitude  >= minLat && wp.latitude  <= maxLat
-             && wp.longitude >= minLon && wp.longitude <= maxLon)
-                return true;
+            if (waypointInSigmet(wp, s.getJSONArray("coords"))) return true;
         }
         return false;
+    }
+
+    // Bounding-box containment check with antimeridian-crossing support.
+    // Tracks the minimum positive longitude and maximum negative longitude
+    // separately so Pacific SIGMETs (e.g. 170°E–170°W) are handled correctly
+    // without collapsing into a near-global false-positive bbox.
+    private boolean waypointInSigmet(Waypoint wp, JSONArray coords) {
+        double minLat =  90, maxLat = -90;
+        double minLon = 180, maxLon = -180;
+        double minPositiveLon = 180, maxNegativeLon = -180;
+        boolean hasPositiveLon = false, hasNegativeLon = false;
+
+        for (int j = 0; j < coords.length(); j++) {
+            JSONObject pt = coords.getJSONObject(j);
+            double lat = pt.optDouble("lat", 0);
+            double lon = pt.optDouble("lon", 0);
+            if (lat < minLat) minLat = lat;
+            if (lat > maxLat) maxLat = lat;
+            if (lon < minLon) minLon = lon;
+            if (lon > maxLon) maxLon = lon;
+            if (lon >= 0) {
+                hasPositiveLon = true;
+                if (lon < minPositiveLon) minPositiveLon = lon;
+            } else {
+                hasNegativeLon = true;
+                if (lon > maxNegativeLon) maxNegativeLon = lon;
+            }
+        }
+
+        if (wp.latitude < minLat || wp.latitude > maxLat) return false;
+
+        // Antimeridian-crossing polygons have both positive and negative
+        // longitudes with a total span > 180°. In that case the "inside"
+        // region wraps through 180° so the check is inverted.
+        boolean crossesAntimeridian =
+            hasPositiveLon && hasNegativeLon && (maxLon - minLon) > 180;
+
+        if (crossesAntimeridian) {
+            return wp.longitude >= minPositiveLon || wp.longitude <= maxNegativeLon;
+        }
+        return wp.longitude >= minLon && wp.longitude <= maxLon;
     }
 }
